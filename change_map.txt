@@ -1,0 +1,3 @@
+Map a CAPE bus to another CAPE bus to avoid phase shift issues:
+Bus -> To Map
+1805 -> 56034
