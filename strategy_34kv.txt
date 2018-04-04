@@ -1,0 +1,8 @@
+34 kV mapping:
+
+	First, make sure all the 34 kV buses in the planning case are connected to step up transformers only. If they have other 34 kV branches, print them
+	Get all the 34 kV buses which are connected to transformers. If the 34 kV buses are not connected to other 34 kV buses, leave them as is.
+	If the 34 kV buses are part of a 34 kV network, then we need to figure out a way to deal with them:
+		Make groups of 34 kV buses, and identify the end points
+		 If the end points are not connected to other transformers, then we map the entire way with the same bus angle as the starting points
+		 If the end points are connected to other tf, we try to map all angle in the mid-nodes according to the line impedance.
