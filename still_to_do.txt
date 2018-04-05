@@ -1,0 +1,161 @@
+Logs:
+	ThreetoTwoWinderManualMapv2.txt contains the new maps of the CAPE three winders, for cases where a CAPE three winder is actually a two winder in planning. By new maps, i mean that the maps have been generated from manual_map file.
+	It has been generated from threetoTwoWinderAuto.txt and using changeThreeToTwoWinderTFMappingv4.py
+	
+	ThreetoTwoWinderNewIsssues.txt lists the new issues. Any bus which has no map has been labeled as 0.
+	threetoTwoWinderDuplIssue.txt contains all the cases where multiple CAPE 3w tf are being mapped to a single 2w tf in planning.  This issue file should be compared with ThreetoTwoWinderManualMap.txt and ThreetoTwoWinderNewIsssues.txt
+	noconnection3wIssuesSolved.txt contains the solution strategy for all the cases where a CAPE 3w did not have a proper connection between primary and secondary in planning
+	For CAPE tf which were deemed by the script to have no corresponding planning tf (len of planning bus map == 1), they have been left as is in the new tf file. Any phase shift has been incorporated in the bus data file.
+	4winderlog.txt lists all the old and new 4 winder tf data
+	4winderSubSummary.txt summarizes the process of generating the new transformers from the 4 winder data
+	deleteOld4winderdata.txt lists all the transformers to be deleted from the CAPE raw file
+	new4winderdata.txt lists all the tf data to be added (from the fixed 4 winder data)
+	AdvancedMidPointCases.txt includes all the CAPE cases which are mapped to midpoint sets in planning (found manually)
+	substitute3wTo2w.py does all the 3w->2w impedance transfer. Note that it acts on  a raw file where the three winders have already been converted. It also handles CZ = 2 and CZ = 3 cases.
+	Fix3wto3wAndNoChangeCasesInFinalSol.py solves all the cases where 3 winders are left as is, and  3 winders have 3 winder substitution
+	newTFDataToSubstitute.txt contains the most recent substitution of 4 winder impedance, to be added into the raw file which contains only 2 winders
+	TFToSkip.txt contains all the 2 winders to skip adding in the raw file which contains only 2 winders
+	In the folder 'Raw with only 2 winders':
+		addtfSpecialCases.py removes the previous tf data corresponding to 4 winder tf needed changing, and adds the updated tf data. It also runs substitute3wTo2w.py and gets the tf data to add into the final
+		raw file.
+		
+	
+	
+Solve issue:
+	Write a script which checks if all the 34.5 kV buses in the planning case are just tertiaries of transformers
+	Write a script which makes sure all the gen and load buses are connected at a depth of 1 to the HV system (> 138 kV)
+	Deal with the issue in Issue_0403. Scale the impedances of the CAPE tf in there.
+	#Look into the HVIssues.txt file in folder 'Make Angles Same (Failed)'
+	Investigate the strategy of removing 34 and lower kv buses which are not essential
+	#Compare between FinalRawMM and FinalRawMM2 (specially the bus info) and add the differences to change_map.txt
+	#Explore the 34.5 kV regions and see if the network is simple and angle can be divided according to impedances
+	Start generating a road map to this donut hole project, to help find where everything is
+	#Think about a script which will group voltage and angles for buses which are nearby (low branch impedance)
+	#Solve the case in Issue_0402
+	#Think about changing the mapping for problematic cases, starting with 56034, 1805 pair. A file for that has been created (maybe temporarily) named change_map.txt 
+	
+	#Look at the new issues
+	#Copy AllMappedBusDataIter2 to the raw with 2 winders only folder
+	#Write a code which will substitute all the bus data in FinalRaw0327. This new raw file will be used in changedBusAngleTree
+	#Investigate the issues in the new raw file
+	#Generate the new raw file which contains the shifted bus data
+	#Finishing logging the last case 750206 and organize that stuff
+	# Negate any phase shift if the original bus having phase shift was a HV bus. After negation, apply phase shift to the LV bus.
+	#Work on changeBusAngleTree.py:
+		#Check the ParentDict concept and see if its verified
+		#Implement the angle shifts
+		#Integrate the angle shifts into the raw file
+		#Make sure that the shifts at the boundaries match
+		#Clean the code and put comments
+		#Do a BFS search for branch connections to any bus whose angles have been changed
+		#Stop if the branch connection is connected to a phase shift tf. Then make sure the branch connection angle matches up.
+	
+
+	#Finish logging New4winderSubSummary
+	#Finish substituting the remaining 2 four winders
+	#Finish substituting the 3 special cases
+	#Finish the remaining case
+	#Once I get the new raw file with all 3 winders changed to 2 winders:
+		#Run substitute3wTo2w.py on it
+		#Write a script which will add the data in newTFDataToSubstitute.txt and skip the tf listed in TFToSkip. Add this script to the process
+		#Change the 4 winder info manually
+	#Make sure all the 3 winders have been accounted for, and that no duplicate substitutions happened
+	#Check if the 3 winder substitution happened correctly
+	Properly comment Fix3wto3wAndNoChangeCasesInFinalSol.py
+	#Change the 4 winder info manually
+	#Handle the special cases manually and add them
+	#Deal with all the remaining cases in Final_sol_3w.txt. 
+	Figure out how to integrate all the scripts and the 3w->3w substitution.
+	#Check substitute3wTo2w.py code properly specially about the Midpoint bus and tmapDict
+	#Complete substitute3wTo2w.py so that the new impedance values are properly substituted
+	#Check the generated file in  substitute3wTo2w.py. Find a way to substitute that data into the raw file
+	#Properly comment substitute3wTo2w.py
+	Four winder issues need to be re-evaluated. The topology needs to remain the same as that of CAPE and impedances need to scaled to match that of planning.
+	#Implement scripts to substitute all cases in Final_sol_3w.txt, starting with conversion of 3 winder to 2 winder
+	#Check TFIter2.txt to make sure the substitutions are correct
+	#Put detailed comments in NewMidpointTFFix.py
+	#Figure out a script which can map the tf midpoint data in stillToSolveCasesMod.txt:
+		#This can be done by changing the map of the neighbour buses of the midpoints and then use the tryMidPoints function
+	#For now, all the cases in Final_sol_3w.txt are just being logged, no actual change happening. This needs to change. The changes need to be implemented.
+	#For the midpoint cases in stillToSolve, decide if you want to replace manually or by a script
+	#Put in 4 winder tf substitution into Final_sol_3w.txt so that they do not appear in stillToSolveCases.txt
+	For the special cases, add data manually and include the whole set as a separate file. For the old data, just skip.
+	#Incorporate SolveGenIssues.txt into FinalSol3w.txt
+	#List all the cases which still need to be manually solved. Then solve them.
+	#Finish finding substitutions for the remaining three cases in ThreetoTwoWinderNewIsssuesMod.txt
+	While substituting, handle special cases carefully.
+	#To change 4 winder data:
+		#Incorporate the data in new4winderdata.txt into the new tf data through some script. Add change log into 4winderlogdata.txt
+		#Delete all the fictitious buses in deleteFictBusList.txt
+		#Keep track of the transformers which need to be deleted. Put it in deleteOld4winderdata.txt
+		#Make sure the changes are also incorporated into the seq file
+		#The zero seq file needs to be changed in a similar fashion
+	#Change the 4 winder mapping, to incorporate the planning topology
+	#Go through all the cases in ThreetoTwoWinderNewIsssuesMod.txt and find the proper mapping. Integrate them into changeThreeToTwoWinderTFMappingv2.py, so that ThreetoTwoWinderManualMap.txt can be added to the Final Solution file.
+	#For any CAPE tf which does not have equivalent planning tf, make sure the bus angles are shifted properly. I am talking about all the cases where i manually say there is no planning tf. Also, for any tf which are being replaced.
+	#Change the output of all the files in changetransformer.py The first line should detail what is the file listing and make sure no voltage info is there. 
+	#In noconnection3wIssuesSolved.txt, need to deal with following lines:
+	#	750391,1727,2517->272432,273108,273108 # Should be mapped to the midpoint set: 272432->275236(M)->273108
+	#	750392,1728,2518->272432,273108,273108 # Should be mapped to the midpoint set: 272433->275235(M)->273109
+		
+	#Make a new solution file, which will contain all the solved cases for 3 winder to 2 winder mapping. While generating the log file and the new tf value replacements, this file should be consulted first.
+	#The solution file should include the following cases:
+		#Dealing with cases in noconnection3wIssuesSolved.txt
+		#Dealing with cases in ThreetoTwoWinderManualMapv2.txt
+		Dealing with cases in ThreetoTwoWinderNewIsssuesMod.txt
+		#Changing the 4 winders to a 2 winder set
+	#Each section in this file should have a line detailing the issues solved in the section
+	#After incorporating the solutions, generate a list of transformers which have not been mapped yet. Should be a small number.
+		
+		
+		
+		
+		
+	#threetoTwoWinderDuplIssue.txt contains all the cases where multiple CAPE 3w tf are being mapped to a single 2w tf in planning. Go through them and fix them.
+	
+	#While considering branch groups, make sure that the circuit breaker is closed. Only then add them to the branch group.
+	In the AllMapped.log file, i can overwrite a CAPE map to reflect mapped_buses.csv. 
+	Use mapped_buses_cleaned_0313.csv to map the 3 winders and see what changes happen
+	Consider changing all the 4 winders to 2 winders as in PSSE
+	Also consider just changing the problematic cases with mapped_buses_cleaned_0313.csv and see whats left.
+	#Finish investigating all the cases in tfIssueFileNewMod.txt
+	#Need to figure out how to deal with cases where the secondary and tertiary are not very LV but all three winders map to same bus
+	
+	tfIssueFileNew.txt contains all the cases where there is no match between the CAPE tf and the set of mapped buses in planning, i.e., the mapping does not make sense and should be changed
+	to be consistent with transformer connections
+	
+	ThreetoTwoWinderMappingOld.txt contains all the cases where a CAPE three winder has become a two winder in planning. The duplicate CAPE 3w tf-> 2w tf cases are also present in this file
+	
+	
+	For now, any tf with all three winders mapped to same bus, let the tf remain the same, and change bus angles and make a list of the new bus values in newBusAngles.txt
+	These values should be ultimately integrated into the busdata file
+	
+	All the three winders with secondaries and tertiaries <10 kv have no phase shift. The only ones with phase shift are those which were originally 4 winders:
+		100010,  2991,  5232,'1 ',2,2,1, 0.00000E+0, 0.00000E+0,2,'            ',1,   1,1.0000,   0,1.0000,   0,1.0000,   0,1.0000,'            '
+		100012,  2993,  5233,'1 ',2,2,1, 0.00000E+0, 0.00000E+0,2,'            ',1,   1,1.0000,   0,1.0000,   0,1.0000,   0,1.0000,'            '
+	#For the issues file, put bus voltage in parentheses
+	#For tf which have all three buses mapped to same planning bus:
+	#	Go through 10 samples randomly
+	#		If all of them are <10 kV, write a script:
+	#			if the secondary and tertiary are both <10kV, just add the phase shift to the buses 
+	Email professor the case where a CAPE three winder has been replaced by a 2 winder in planning
+	#For cases where there are no equivalent tf in planning, make sure the phase shifts have been added into the bus angles
+	Test the phase shift case in PSSE (the sign)
+	#Generate a file which will list all the transformer multi-bus mapping and go through it
+	#Find cases where planning transformers have multiple matches in CAPE and deal with them
+	#Go through cases where the script cannot find equivalent tf for tf which have generator buses
+	#Go through cases where multiple tf windings in CAPE are mapped to the same planning bus
+	
+	
+MidpointTFdata['275174'] is fine in the other file
+Mapping of midpoint transformers
+	
+	Need to add the new tf data properly
+	Make sure the phase shifts are in correct order (otherwise change sign)
+	
+	#Generating a dict where key is the midpoint, values are the tf data connected to it
+	When mapping is found:
+		#the planning buses need to be renumbered into CAPE buses
+		#any phase shift info in the original CAPE buses need to be added to the tf bus
+		#add the midpoint bus to bus data
+		
