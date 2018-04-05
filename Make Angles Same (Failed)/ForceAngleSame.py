@@ -7,7 +7,7 @@ import math
 
 Raw2winder = 'FinalRAW03312018MM2.raw'
 #Raw2winder = 'FinalRAW03312018.raw'
-new2winderRawFile = 'testRAW04042018.raw' # new raw file with angles changed
+new2winderRawFile = 'testRAW04052018.raw' # new raw file with angles changed
 HVIssueFile = 'HVIssues.txt' # HV buses which should have angles same (needs to be looked into)
 
 
@@ -72,7 +72,8 @@ for i in range(branchStartIndex,branchEndIndex):
 	Bus1 = words[0].strip()
 	Bus2 = words[1].strip()
 
-	if Bus1 in ComedBusSet and Bus2 in ComedBusSet:
+	status = words[-5].strip()
+	if Bus1 in ComedBusSet and Bus2 in ComedBusSet and status == '1':
 		R = float(words[3].strip())
 		X = float(words[4].strip())
 
@@ -85,11 +86,11 @@ for i in range(branchStartIndex,branchEndIndex):
 
 
 				msg = 'Bus1: ' +  Bus1 + ',' + str(BusAngleDict[Bus1]) + ',' +  'Bus2: ' +  Bus2 + ',' + str(BusAngleDict[Bus2]) + ',' + 'Impedance: ' + str(R) + ',' + str(X)
-				if BusVoltDict[Bus1] > 138.0:
-					#print msg
+				if BusVoltDict[Bus1] >= 138.0:
+					print msg
 
-					HVIssues.append(msg)
-				#troubleSomeLines.append(msg)
+					#HVIssues.append(msg)
+				troubleSomeLines.append(msg)
 
 
 				# keep a log of the changes
@@ -106,13 +107,13 @@ with open(HVIssueFile,'w') as f:
 		f.write(line)
 		f.write('\n')
 
-"""
+
 # keep a log of old issues
-with open('tmp.txt','w') as f:
+with open('logIssues0405.txt','w') as f:
 	for line in troubleSomeLines:
 		f.write(line)
 		f.write('\n')
-"""
+
 
 
 
