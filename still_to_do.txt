@@ -22,7 +22,13 @@ Logs:
 	
 	
 Solve issue:
-	Write a script which checks if all the 34.5 kV buses in the planning case are just tertiaries of transformers
+	Identify all the 34 kV buses which are important for loads and gen. Make a list for that
+	For all the 34 kV buses which are connected to HV buses through step up tf:
+	 If they are part of the important list, keep them. If they have branches which are unimportant, disconnect those branches (or disconnect such neighbours).
+	 Disconnect all the remaining 34 kV buses which are connected to HV buses through transformers
+	
+	#Investigate the special cases identified by analyseGenData.py
+	#Write a script which checks if all the 34.5 kV buses in the planning case are just tertiaries of transformers
 	Write a script which makes sure all the gen and load buses are connected at a depth of 1 to the HV system (> 138 kV)
 	Deal with the issue in Issue_0403. Scale the impedances of the CAPE tf in there.
 	#Look into the HVIssues.txt file in folder 'Make Angles Same (Failed)'

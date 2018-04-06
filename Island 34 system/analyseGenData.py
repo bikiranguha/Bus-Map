@@ -1,3 +1,6 @@
+from generateNeighbours import BranchConnDict, tfConnDict
+
+
 verifiedMapFile = 'PSSEGenMapVerified.txt'
 NewRaw = 'NewCAPERawClean.raw'
 
@@ -8,30 +11,6 @@ PSSEGenBusSet = set()
 CAPEGenBusSet = set()
 Gen34kVSet = set() # set of 34 kV buses which are either gen bus or are connected to gen buses somehow
 BusVoltDict = {}
-
-
-
-def checkVoltageTFWindings(tfBusList,currentBus):
-
-	for Bus in tfBusList:
-		if Bus == currentBus:
-			continue
-
-		if Bus == '0':
-			continue
-
-		if BusVoltDict[Bus] <= 40.0:
-			print "Bus: ", Bus
-			print "Voltage: ", BusVoltDict[Bus]
-			print '\n'
-
-
-
-
-
-
-
-
 
 
 
@@ -110,48 +89,35 @@ if noGenBranchConnections == 1:
 
 #################################
 
-# check the transformer connections of the generator buses:
-tfStartIndex = fileLines.index('0 / END OF BRANCH DATA, BEGIN TRANSFORMER DATA') + 1
-tfEndIndex = fileLines.index('0 / END OF TRANSFORMER DATA, BEGIN AREA DATA')
-i = tfStartIndex
-while i < tfEndIndex:
-	line = fileLines[i]
-	words = line.split(',')
-	Bus1 = words[0].strip()
-	Bus2 = words[1].strip()
-	Bus3 = words[2].strip()
 
-	tfBusList = [Bus1,Bus2,Bus3]
+# investigate the tf connections of the gen buses
+for Bus in list(PSSEGenBusSet):
 
-	#PSList = getPhaseShifts(i, fileLines, Bus3)
+	if Bus in tfConnDict.keys():
+		for neighbour in tfConnDict[Bus]: # tf conn of gen buses
+			if BusVoltDict[neighbour] > 40.0: # One of the tf winding is HV, continue to next gen bus
+				break
 
-	if Bus3 == '0': # two winder
-		if Bus1 in PSSEGenBusSet:
-			checkVoltageTFWindings(tfBusList,Bus1)
+			if neighbour in BranchConnDict.keys(): # LV neighbour has branches
+				print 'Bus ' + Bus + ' has a LV tf connection ' + neighbour + ' which contains branches.'
 
-
-		if Bus2 in PSSEGenBusSet:
-			checkVoltageTFWindings(tfBusList,Bus2)
-
-
-		i+=4
-
-
-	else: # three winder
-
-
-		if Bus1 in PSSEGenBusSet:
-			checkVoltageTFWindings(tfBusList,Bus1)
-
-		if Bus2 in PSSEGenBusSet:
-			if BusVoltDict[Bus1] > 40.0:
-				i+=5
+			if neighbour in Gen34kVSet: # LV neighbour already identifed as a 34 kV gen bus
 				continue
+			
+			neighboursDepth2 = tfConnDict[neighbour] # depth 2 neighbour of current gen bus
 
-		if Bus3 in PSSEGenBusSet:
-			if BusVoltDict[Bus1] > 40.0:
-				i+=5
-				continue
-			checkVoltageTFWindings(tfBusList,Bus3)
+			for neighbourD2 in neighboursDepth2:
+				if neighbourD2 not in PSSEGenBusSet and BusVoltDict[neighbourD2] < 40.0:
+					print 'Bus ' + Bus + ' has a LV tf connection ' + neighbour + ' which are connected to other LV buses through transformers.'
+	else:
+		if Bus in Gen34kVSet: # 34 kV gen bus, already acknowledged in script
+			continue
+		print 'Bus ' + Bus + ' does not have a direct HV tf connection. Please investigate.'
 
-		i+=5
+
+
+print 'Set of 34 kV generator buses:'
+print Gen34kVSet
+
+
+
