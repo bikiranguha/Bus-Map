@@ -1,0 +1,24 @@
+List of 34 kv which are connected to generators through transformers or branches:
+5104
+5234
+10020
+5162
+10029
+3054,3041
+5188
+10001
+8
+9010
+10021
+5018
+5235
+List of 34 kv generator buses:
+274856
+274848
+274850
+274864
+274872
+274863
+274857
+274858
+

@@ -95,7 +95,7 @@ for Bus in list(PSSEGenBusSet):
 
 	if Bus in tfConnDict.keys():
 		for neighbour in tfConnDict[Bus]: # tf conn of gen buses
-			if BusVoltDict[neighbour] > 40.0: # One of the tf winding is HV, continue to next gen bus
+			if BusVoltDict[neighbour] > 40.0 and len(tfConnDict) <=3: # One of the tf winding is HV, continue to next gen bus
 				break
 
 			if neighbour in BranchConnDict.keys(): # LV neighbour has branches
