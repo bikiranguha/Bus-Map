@@ -4,7 +4,8 @@ List of 34 kv which are connected to generators through transformers or branches
 10020
 5162
 10029
-3054,3041
+3054
+3041
 5188
 10001
 8
@@ -13,13 +14,6 @@ List of 34 kv which are connected to generators through transformers or branches
 5018
 5235
 11003
-List of 34 kv generator buses:
-274856
-274848
-274850
-274864
-274872
-274863
-274857
-274858
+11002
+
 

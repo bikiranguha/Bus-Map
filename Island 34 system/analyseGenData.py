@@ -3,6 +3,7 @@ from generateNeighbours import BranchConnDict, tfConnDict
 
 verifiedMapFile = 'PSSEGenMapVerified.txt'
 NewRaw = 'NewCAPERawClean.raw'
+GenBusFile  = 'GenBusFile.txt'
 
 PSSEGenVoltDict = {}
 CAPEGenVoltDict = {}
@@ -95,8 +96,14 @@ for Bus in list(PSSEGenBusSet):
 
 	if Bus in tfConnDict.keys():
 		for neighbour in tfConnDict[Bus]: # tf conn of gen buses
-			if BusVoltDict[neighbour] > 40.0 and len(tfConnDict) <=3: # One of the tf winding is HV, continue to next gen bus
+			if BusVoltDict[neighbour] > 40.0: # One of the tf winding of the gen bus is HV, so we can ignore all the remaining LV neighbours (if any)
 				break
+			else:
+				tfconnLVneighbour = [conn for conn in tfConnDict[neighbour] if conn != Bus]
+				if len(tfconnLVneighbour) >0:
+					for n in tfconnLVneighbour:
+						if BusVoltDict[n] > 40.0:
+							print 'Bus ' + Bus + ' has a LV tf connection ' + neighbour + ' which connects to the HV network.'
 
 			if neighbour in BranchConnDict.keys(): # LV neighbour has branches
 				print 'Bus ' + Bus + ' has a LV tf connection ' + neighbour + ' which contains branches.'
@@ -116,8 +123,15 @@ for Bus in list(PSSEGenBusSet):
 
 
 
-print 'Set of 34 kV generator buses:'
-print Gen34kVSet
+#print 'Set of 34 kV generator buses:'
+#print Gen34kVSet
+
+with open(GenBusFile,'w') as f:
+	f.write('List of gen buses:')
+	f.write('\n')
+	for bus in list(PSSEGenBusSet):
+		f.write(bus)
+		f.write('\n')
 
 
 
