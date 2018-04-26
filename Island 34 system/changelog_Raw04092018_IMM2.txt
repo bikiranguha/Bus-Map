@@ -1,0 +1,10 @@
+log of manual changes from tmp_island_branch_fixed.raw to Raw04092018_IMM2.raw:
+
+Impedance of transformer  854,  5137,     0,'1 ' was changed from 0.00000E+0, 7.50000E-3 to  3.37200E-2, 1.72710E+0. The new impedance is Z31 of transformer 271462,273153,273152,'1 ' in the planning case, with the 
+SBase changed from 100 MVA to 300 MVA.
+
+Change in bus mapping: (mappings also changed in mapped_buses_cleaned0407.csv)
+271250->3182 (previously mapped to 271994)
+271994->7129 (previously mapped to 271995)
+271195->750272 (previously mapped to 271194)
+271197->2782 (previously mapped to 271902)

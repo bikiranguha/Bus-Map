@@ -22,9 +22,37 @@ Logs:
 	
 	
 Solve issue:
-	Look at the issues in tmp_island_branch_fixed.raw
-	Continue developing readme files for each folder, starting with the current folder
-	Learn how to run tree and disconnect buses on PSSE
+	Write a detailed readme for the loadsplit folder and then push the whole thing
+	#do the bus mapping with phase shifts included in loadMap.py
+	#generate new raw file with the new load data and new tf data in loadMap.py
+	#Generate a script which will do the mapping of the buses, loads and transformers given a right combo
+	Maybe most of the CAPE LV mult tf loads with 4 digits and starting with 4 all end with numbers which signify the tf no. This can help automate some of the mappings
+		However with this automation, we need to be careful about including the phase shifts
+	#Do the LAMP sub-project
+	#Solve the issue at bus 5137
+	#Look at bus 4412. Compare the voltage magnitudes and angles of Tinley 72 and 74 and the impedances to figure out where is the mismatch coming from. Do this in Raw0414tmp_loadsplit.raw
+	#Fix the mapping of Bus 2477 and 2478. They need to be mapped to some neighbour. Then try Raw0419_reen.raw again
+	#Find out why the buses in manualChangesFile.txt were disconnected.
+	Implement the comments in applyManualChanges.py
+	#Investigate the angle issues in 4412 and 5137 in tmp_island_branch_fixedv2AngleShifted.raw. Probably due to incorrect mapping
+	#Also write the scripts to automate manual changes to bus mapping. Maybe apply it to tmp_island_branch_fixedv2AngleShifted.raw and changelog_Raw04092018_IMM2.txt
+	#changeBusAngleTree.py is phase shifting non-comed buses. Fix this. Something is wrong in AngleChangeDict, it is including these non-comed buses. It might even be in changetfData.py, since logAngleChange is showing them as well.
+	#Fix the part in changeBusAngleTree.py:
+	#	Any bus which is downstream and had their phase shifted already, the shift should not be applied again
+	#Complete shiftAngles.py:
+	#	Get all the manual changes in a file so that the script can keep track
+	#	Change angles for any bus which is not included in manual changes, otherwise print
+	#Write a script which can incorporate any angle changes done manually
+	#solve the issue regarding CAPEVoltageDict in changeTransformerDatav16.py. The CAPEVoltageDict used earlier looked in NewCAPERawClean.raw, which did not contain the fictitious set (100000-100010). Maybe just add these 
+	#buses into there to solve issue
+	#implement phase shifts in changeAngleBusTreeOld.py when the branch neighbour gets phase shifted, any LV tf conn also gets phase shifted
+	#After getting the bus data for the phase shifts, keep track of all angles changed and change them in the newest raw file (right now that would be (tmp_island_branch_fixedv2.raw). None of the manual changes in
+	#changelog have been applied to that file
+	Write a script which flags branches where the CAPE impedance is not close to planning impedance. For now, it should just look at 138 kV branches
+	Write a script which can do the copy pasting of bus voltage and angles from PSSE to cape
+	#Look at the issues in tmp_island_branch_fixed.raw
+	#Continue developing readme files for each folder, starting with the current folder
+	#Learn how to run tree and disconnect buses on PSSE
 	#Identify all the 34 kV buses which are important for loads and gen. Make a list for that
 	#For all the 34 kV buses which are connected to HV buses through step up tf:
 	 #If they are part of the important list, keep them. If they have branches which are unimportant, disconnect those branches (or disconnect such neighbours).

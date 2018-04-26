@@ -1,4 +1,4 @@
-All these changes need to be done to FInalRaw033312018.raw
+All these changes have been applied to convert FInalRaw033312018.raw to FInalRaw033312018MM2.raw
 
 Map a CAPE bus to another CAPE bus to avoid phase shift issues:
 Bus -> To Map
