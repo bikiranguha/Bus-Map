@@ -1,19 +1,18 @@
 """
-Generate a dict which will contain tf data for Comed LV buses in the planning file
+Generate a dict which will contain tf data and tf name and key data for Comed LV buses in the CAPE file
 """
 
 
-planningRaw = 'hls18v1dyn_1219.raw'
-listMultTFfile = 'listMultTFfileCAPE.txt'
+CAPERaw = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Island 34 system/' +  'Raw0414tmp.raw'
+
 
 ComedLVBusSet = set() # all LV buses in comed
-LVTFDataDict = {} # key: Bus1, Bus2, cktID (without apostrophy), value: tf data
-tfNameDict = {} # key: LV bus, values: [transformer name, tf key (bus1, bus2, ckt id)]
+tfNameDictCAPE = {} # key: LV bus, values: [transformer name, tf key (bus1, bus2, ckt id)]
 
 
 
 # get the relevant comed bus sets
-with open(planningRaw, 'r') as f:
+with open(CAPERaw, 'r') as f:
 	filecontent = f.read()
 	fileLines = filecontent.split('\n')
 	for line in fileLines:
@@ -55,31 +54,20 @@ while i < tfEndIndex:
 		if status == '1':
 			key = Bus1 + ',' + Bus2 + ',' + cktID
 
-			# generate tfNameDict
+			# generate tfNameDictCAPE
 			if Bus1 in ComedLVBusSet:
 				keyBus = Bus1 # keyBus is the LV bus
 			else:
 				keyBus = Bus2
 
 
-			if keyBus in tfNameDict.keys():
-				tfNameDict[keyBus].append([tfname,key])
+			if keyBus in tfNameDictCAPE.keys():
+				tfNameDictCAPE[keyBus].append([tfname,key])
 
 			else:
-				tfNameDict[keyBus] = [[tfname,key]]
-			#########
+				tfNameDictCAPE[keyBus] = [[tfname,key]]
 
-			tfDataList = []
-			tfDataList.append(line)
-			for j in range(3):
-				i +=1
-				line = fileLines[i]
-				tfDataList.append(line)
-			LVTFDataDict[key] = tfDataList
-
-			i+=1
-		else:
-			i+=4
-
+		i+=4
 	else:
 		i+=4
+

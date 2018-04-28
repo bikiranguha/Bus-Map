@@ -22,7 +22,8 @@ Logs:
 	
 	
 Solve issue:
-	Write a detailed readme for the loadsplit folder and then push the whole thing
+	Write a script which will utilize the idea of CAPE 4 digit starting with 4 (which may contain tf info)
+	#Write a detailed readme for the loadsplit folder and then push the whole thing
 	#do the bus mapping with phase shifts included in loadMap.py
 	#generate new raw file with the new load data and new tf data in loadMap.py
 	#Generate a script which will do the mapping of the buses, loads and transformers given a right combo

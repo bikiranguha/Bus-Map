@@ -22,6 +22,8 @@ listMultTFLines = []
 noMatchNumTF = set() # set of CAPE loads whose number of connected step up tf do not match that of planning
 compLines = [] # lines which contain comparison info about the number of step up tf connected to CAPE and planning loads
 BusZoneDict = {} # should be pretty self explanatory
+BusNameDict = {} # dictionary which contains bus names in its values
+BusTypeDict = {} # dictionary of Bus Type for all comed buses
 #multTFLoad = set() # set of LV loads which are connected to multiple step up tf
 
 
@@ -49,6 +51,8 @@ with open(CAPERaw, 'r') as f:
 			BusLine[Bus] = line
 			ComedBusSet.add(Bus)
 			BusZoneDict[Bus] = words[5].strip()
+			BusNameDict[Bus] = words[1].strip("'").strip()
+			BusTypeDict[Bus] = words[3].strip()
 			if BusVolt < 40.0:
 				ComedLVBusSet.add(Bus)
 

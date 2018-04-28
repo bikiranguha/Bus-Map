@@ -14,6 +14,7 @@ rawFileOld = 'Raw0414tmp_loadsplit.raw'
 loadMapDict = {}
 ManualMapDict = {} # dict where the maps of the mult load buses are 
 combinedMapDict = {} # key: loads which have mult tf conn, values: maps in loadBusNoChangelog and mapFile
+loadMapDictCAPE = {}
 
 # get map info
 with open(loadBusNoChangeLog,'r') as f:
@@ -31,6 +32,7 @@ with open(loadBusNoChangeLog,'r') as f:
 		CAPEBus = words[1].strip()
 		if planningBus not in loadMapDict.keys():
 			loadMapDict[planningBus] = CAPEBus
+			loadMapDictCAPE[CAPEBus] = planningBus
 		else:
 			print CAPEBus
 
