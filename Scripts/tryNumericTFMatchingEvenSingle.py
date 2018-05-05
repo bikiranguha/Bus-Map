@@ -20,10 +20,10 @@ from depth3BranchConnLVLoadCAPE import Depth3Dict
 from checkLoadSplit import multTFLoad
 from generateLVTFNameCAPE import tfNameDictCAPE # dict which has LV CAPE bus as key, and values: [transformer name, tf key (bus1, bus2, ckt id)]
 loadAlreadySplit = 'loadAlreadySplitList.txt'
-tfMapFile = 'tfMapFile.txt'
-tfMapLog = 'tfMapLog.txt'
+tfMapFile = 'tfMapFileEvenSingle.txt'
+tfMapLog = 'tfMapLogEvenSingle.txt'
 testMapOld = 'testMapOld.txt'
-newMapFile = 'autoTFMap0428.txt' # contains all the tf maps (including the manual ones done by me earlier)
+newMapFile = 'autoTFMap0430.txt' # contains all the tf maps (including the manual ones done by me earlier)
 logLinesNametoTF = [] # log of the tf connections which will be mapped using CAPE bus name to planning tf name
 logLinesTFtoTF = [] # log of the tf connections which will be mapped using CAPE tf name to planning tf name
 alreadySplitSet = set() # set of CAPE LV load buses which have been properly split in Raw_loadsplit.raw
@@ -118,8 +118,11 @@ for Bus in ComedLVLoadSet:
 		continue
 	CAPETFID = tfNameDictCAPE[Bus][0][1]
 
+	
 	if planningBus not in multTFLoad: # the planning load bus does not have multiple step up tf
-		continue
+		for tfD in tfNameDict[planningBus]:
+			print tfD[1] # planning tf key
+	
 	getNametoTFNameMatch(Bus,planningBus,BusName,last2Digits,CAPETFID)
 
 	# look at all neighbours within depth 2 and try to find a name to tf name match
@@ -172,8 +175,11 @@ for Bus in ComedLVLoadSet:
 
 		planningBus = loadMapDictCAPE[Bus]
 
+		"""
 		if planningBus not in multTFLoad: # the planning load bus does not have multiple step up tf
-			continue
+			for tfD in tfNameDict[planningBus]:
+				print tfD[1] # planning tf key
+		"""
 		CAPETFID = tfData[1]
 		getCAPEToPSSETFNameMatch(Bus,planningBus,tfName,CAPEBusName,last2Digits,CAPETFID)
 		#getCAPEToPSSETFNameMatch(CAPEBus,planningBus,tfNameCAPE, BusName,last2Digits,CAPETFID)
@@ -240,4 +246,4 @@ if __name__ == "__main__":
 			f.write(line)
 			f.write('\n')
 
-	import loadMap # script which does the maps by looking at newMapFile
+	#import loadMap # script which does the maps by looking at newMapFile

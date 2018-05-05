@@ -3,9 +3,9 @@
 # handle the tf mapping in the same way
 # handle the bus mapping
 
-mapFile = 'testMap.txt'
+mapFile = 'autoTFMap0505.txt'
 CAPERaw = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Island 34 system' + '/' + 'Raw0414tmp_loadsplit.raw'
-newRaw = 'RAW0425.raw'
+newRaw = 'RAW0501.raw'
 #mapFile = 'testMaptmp.txt'
 from checkLoadSplit import BusVoltDict as planningBusVoltDict
 from loadSplitCAPE import BusVoltDict as CAPEBusVoltDict, BusZoneDict as CAPEBusZoneDict
@@ -14,6 +14,7 @@ from analyzeLoadFlowReport import flowDict # class which
 from generateLVTFDataDict import LVTFDataDict # dict of planning LV TF data dict
 from LVplanningBusData import planningBusDataDict
 from getPhaseShifts import AngleChangeDict
+from tryAutomateLoadSplit import loadMapDict # dictionary containing info about loadBusNoChangeLog
 
 NewLoadData = {} # key: CAPE Bus, value:  new load data, generated from planning LAMP report
 LoadDataToSkip = set() # set of CAPE buses where the load data needs to be changed
@@ -23,6 +24,7 @@ TFDataToSkip = set()
 newRawLines = []
 loadAdded = set() # keeps track of which load data has been modified, so that we can add load data for buses which previously had no loads
 sampleLoadLine = "  4355,'1 ',1, 222,  20,     1.400,     0.600,     0.000,     0.000,     0.000,     0.000, 222,1,0"
+LoadBusToSkip = ['4667','3037','4107','4783'] # missing transformers for this CAPE load bus, so do not split the load
 # Functions:
 
 def reconstructLine2(words):
@@ -222,12 +224,21 @@ with open(mapFile,'r') as f:
 			CAPEBus2 = CAPEData[0].strip()	
 			CAPEHVplanning = 0
 
+		if CAPEBus2 in LoadBusToSkip: # these load buses have already been taken care of in Raw_loadsplit.raw, so move on to next line
+			continue
+
 		# get ckt id if any
 		if len(CAPEData) > 2:
 			CAPEcktID  = CAPEData[2].strip("'")	
 
 		generateNewLoadDict(planningBus1,planningBus2,CAPEBus2,NewLoadData)
-		LoadDataToSkip.add(CAPEBus2) # skip when adding load lines in new raw file
+
+
+		if CAPEBus2 != loadMapDict[planningBus2]: # CAPE load bus was wrongly mapped, print warning and add the previously mapped bus to a set of load lines which will be skipped
+			#print 'Load map of ' + planningBus2 + ' should be ' + CAPEBus2 + ', not ' +  loadMapDict[planningBus2]
+			LoadDataToSkip.add(loadMapDict[planningBus2]) # add the previous CAPE load map to the skip set, this bus will be skipped if encountered in load data
+
+		#LoadDataToSkip.add(CAPEBus2) # skip when adding load lines in new raw file
 
 		generateNewTFData(planningKey,CAPEKey,CAPEData,primaryHVplanning,CAPEHVplanning,NewTFData)
 		TFDataToSkip.add(CAPEKey) # skip when adding tf lines in new raw file
@@ -236,9 +247,12 @@ with open(mapFile,'r') as f:
 		changeBusData(planningBus1, CAPEBus1)
 		changeBusData(planningBus2, CAPEBus2)
 
-
-
-
+# search for buses which were originally mapped for loads, but then 
+# it was determined that the mapping was wrong and the load was shifted
+for Bus in list(LoadDataToSkip):
+	if Bus not in NewLoadData.keys():
+		print'Load removed from Bus ' + Bus + ' due to wrong mapping earlier.'
+ 
 # generate new raw file with the new bus data, new load data and new tf data
 with open(CAPERaw,'r') as f:
 	filecontent = f.read()
@@ -283,14 +297,17 @@ for i in range(loadStartIndex,loadEndIndex):
 	line = fileLines[i]
 	words = line.split(',')
 	Bus  = words[0].strip()
+
 	# change load MW and load MVAR if the load bus appears in the keys of NewLoadData
-	if Bus in NewLoadData.keys():
+	if Bus in NewLoadData.keys() and Bus not in loadAdded:
 		loadAdded.add(Bus)
 		LoadMW = '%.3f' %NewLoadData[Bus][0]
 		LoadMVAR = '%.3f' %NewLoadData[Bus][1]
 		words[5] = ' '*(10-len(LoadMW)) + LoadMW
 		words[6] = ' '*(10-len(LoadMVAR)) + LoadMVAR
 		line = reconstructLine2(words)
+	elif Bus in LoadDataToSkip: # Load wrongly put at this bus, skip
+		continue
 
 	newRawLines.append(line)
 

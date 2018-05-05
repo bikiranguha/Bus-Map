@@ -7,12 +7,15 @@ can handle one to many mapping
 def MapChange(planningRaw,changeFile,CAPERaw,newRawFile,originalCase):
 	# function to change bus mapping in raw file
 	# originalCase: defines whether we are using planning or CAPE raw file to get bus info
+	angleChangeFile = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/' +  'logAngleChange.txt'
+
 	CAPENewVoltDict = {} # key: CAPEBus whose bus volt and angle will be substituted, value: new volt and angle data
 	ManualMapDict = {} # key: the bus whose data is being used, value: the bus where we superimpose bus data
 	currentBusSet = set()
 	CAPEBusVoltSet = set() # set of all CAPE buses whose bus data will be substituted
 	planningBusSet = set()
 	newRawLines = []
+	AngleChangeDict = {} # dictionary of bus angle changes due to phase shift
 
 	def reconstructLine2(words):
 		currentLine = ''
@@ -20,6 +23,28 @@ def MapChange(planningRaw,changeFile,CAPERaw,newRawFile,originalCase):
 			currentLine += word
 			currentLine += ','
 		return currentLine[:-1]
+
+
+	# Read the angle change values and generate a dict
+	with open(angleChangeFile,'r') as f:
+		filecontent = f.read()
+		fileLines = filecontent.split('\n')
+		for line in fileLines:
+			if 'Bus' in line:
+				continue
+
+			if line == '':
+				continue
+
+			words = line.split('->')
+			Bus = words[0].strip()
+			Angle = float(words[1].strip()) 
+
+			if Angle == 0.0: # Add to dictionary only if there is a phase shift
+				#print Bus
+				continue	
+			AngleChangeDict[Bus] = Angle
+
 
 	# open the file which contains the list of manual changes necessary
 	with open(changeFile,'r') as f:
@@ -109,7 +134,19 @@ def MapChange(planningRaw,changeFile,CAPERaw,newRawFile,originalCase):
 			if Bus in CAPEBusVoltSet:
 				NewVoltageData = CAPENewVoltDict[Bus]
 				words[7] = NewVoltageData[0] # pu volt substitution
-				words[8] = NewVoltageData[1]
+
+				# Apply any phase shifts
+				if Bus in AngleChangeDict.keys():
+					PS = AngleChangeDict[Bus]
+					OldAngle = float(NewVoltageData[1].strip())
+					NewAngle = OldAngle + PS
+					NewAngleStr  = '%.4f' %NewAngle
+					NewAngleStr = ' '*(9-len(NewAngleStr)) + NewAngleStr
+					words[8] = NewAngleStr
+				else:
+					words[8] = NewVoltageData[1] # angle substitution
+
+				# reconstruct line and add
 				newline = reconstructLine2(words)
 				newRawLines.append(newline)
 		
@@ -146,9 +183,11 @@ def MapChange(planningRaw,changeFile,CAPERaw,newRawFile,originalCase):
 
 # only execute this block of code if we are running this file
 # wont be executed if we are importing this module
+
 if __name__ == "__main__":
 	planningRaw = 'hls18v1dyn_new.raw'
 	CAPERaw = 'Raw0419_reen.raw'
 	newRawFile  = 'Raw0419_reen_manual.raw'
 	changeFile = 'manual_tmp.txt'
 	MapChange(planningRaw,changeFile,CAPERaw,newRawFile,'CAPE')
+

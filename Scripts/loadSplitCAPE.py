@@ -8,7 +8,7 @@ Also gets the bus zone info, to be used in other scripts
 from checkLoadSplit import NumLoadTFDict, multTFLoad
 from tryAutomateLoadSplit import loadMapDict
 
-CAPERaw = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Island 34 system/' +  'Raw0414tmp.raw'
+CAPERaw = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Island 34 system/' +  'Raw0414tmp_loadsplit.raw'
 listMultTFfile = 'listMultTFfileCAPE.txt'
 compFile = 'compFile.txt' # csv file containing comparison info on number of tf connections
 
@@ -98,11 +98,12 @@ while i < tfEndIndex:
 
 	i+=4
 
+"""
 for planningBus in list(multTFLoad):
 	CAPEBus = loadMapDict[planningBus]
 	if NumLoadTFDict[planningBus] != NumLoadTFDictCAPE[CAPEBus]:
 		noMatchNumTF.add(CAPEBus)
-
+"""
 
 
 """

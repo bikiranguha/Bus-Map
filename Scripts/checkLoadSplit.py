@@ -13,8 +13,8 @@ NumLoadTFDict = {} # key: bus, value: number of step up tf connected to it
 BusLine = {}
 listMultTFLines = []
 multTFLoad = set() # set of LV loads which are connected to multiple step up tf
-
-
+LoadSet = set() # this set will be used by lamp_reports to generate flow reports for all the LV load buses
+singleTFSet = set() # planning LV load buses which have only one step up tf
 alreadySplitList = ['273330','273331','273152','273153','273334']
 
 # get the relevant comed bus sets
@@ -94,6 +94,12 @@ for bus in NumLoadTFDict.keys():
 		#print bus
 		multTFLoad.add(bus)
 		listMultTFLines.append(BusLine[bus])
+	if NumLoadTFDict[bus] > 0 and bus not in alreadySplitList:
+		#count +=1
+		#print bus
+		LoadSet.add(bus)  # this set will be used by lamp_reports to generate flow reports for all the LV load buses
+	if NumLoadTFDict[bus] == 1 and bus not in alreadySplitList:
+		singleTFSet.add(bus)
 
 #print listMultTFLines
 

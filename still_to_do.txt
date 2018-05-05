@@ -22,13 +22,49 @@ Logs:
 	
 	
 Solve issue:
-	Write a script which will utilize the idea of CAPE 4 digit starting with 4 (which may contain tf info)
+	#Make sure to fix the manual issues first, that of missing tf, multiple tf connected to a tf tertiary bus.
+	#Implement the strategies detalied in missingTFStrategy_ManualTFMapping.txt
+	Find a strategy to properly map the angles of taps in the 345 system. Look at the cases causing mismatch and try to find a pattern.
+	See if you can use the names of the buses to automate some of the mapping.
+	#Look at Manual_Mapping0501 and make Manual_Mapping0503 which does not include any mapping where the LV bus is a generator bus
+	Make sure these changes are still there after accomodating any new changes:
+	271069,274151,1->2027,400090,1
+	272115,274226,8-> 1919,400177,1
+	Make sure the following line is not there in the manual map after the changes:
+	270864,274663,2->750096,274663,1,name match
+	#Generate a text file which contains all the issue cases (non-existent tf or duplicate mapping). In tryNumericTFMapping, skip these mappings and generate the new raw file.
+	Investigate the tertiaries containing loads
+	Examine why 273341,273340,'3 ','WASHI TR 73 ' does not have an equivalent in CAPE. Details in case_WashingtonPark.txt
+	TF 271788,274256,     0,'7 ,'JO409 77    ' has no equivalent tf in CAPE. What to do with it
+	Investigate why Bus 5418 is connected to two midpoints and why Bus 275174 is connected to so many tf
+	Implement the comments in dealwithTFTer.py
+	#Generate LAMP reports for every bus in CAPE Comed and sort them in descending order of mismatch
+	#Generate a list of transformer tertiaries. Their bus names should end with 'TER'. Make sure they dont have any loads on them. Map them to their HV bus, so that there is no power flow to them
+	#Do something about buses such as Bus 5402,'TONNET78 TER'. This bus angle was far off due to wrong mapping. Using regex, you can get a list of such mapping and 
+	#map them to neighbouring HV bus (or even 34 kV bus)
+	#In tryNumericTFMatching:
+		#Look at all the planning tf set in testMapOld. Add them to the planningMappedTFSet
+		#In all the functions, add functionality to skip adding map log and map lines if the newly found tf map already existed in testMapOld
+	#Once you get the mapping file from the CS guys, please check the following mappings:
+		273373,271218,1->3345,2460,1
+		273373,271219,3->8119,2460,1
+		273379,271475,1->3131,4039,1
+		271922,274204,9->1930,400137,1
+		273237,271922,4->2788,4451,1
+		273237,271923,2->2793,4465,1
+		#Load at Bus 4039 currently reflects the load at bus 273380, it should reflect that of 273379 instead. 
+	
+	#Update loadMap.py so that if the LV CAPE bus has no load, it ignores the bus which has the load in the loadBusNoChange.log
+	#Look at the PSSE log files for the new raw and figure out the angle issues
+	Add to mapping_priority1.txt all the manual maps done so far. This file should be consulted first by any script which is going to map something (bus, tf, loads, shunts)
+	#In the loadNoChange log file, see in which cases a LV load bus in CAPE has been mapped to a HV bus in planning. This needs to be fixed. After fix, tryNumericTFMapping can be re-applied to get better results.
+	#Write a script which will utilize the idea of CAPE 4 digit starting with 4 (which may contain tf info)
 	#Write a detailed readme for the loadsplit folder and then push the whole thing
 	#do the bus mapping with phase shifts included in loadMap.py
 	#generate new raw file with the new load data and new tf data in loadMap.py
 	#Generate a script which will do the mapping of the buses, loads and transformers given a right combo
-	Maybe most of the CAPE LV mult tf loads with 4 digits and starting with 4 all end with numbers which signify the tf no. This can help automate some of the mappings
-		However with this automation, we need to be careful about including the phase shifts
+	#Maybe most of the CAPE LV mult tf loads with 4 digits and starting with 4 all end with numbers which signify the tf no. This can help automate some of the mappings
+	#	However with this automation, we need to be careful about including the phase shifts
 	#Do the LAMP sub-project
 	#Solve the issue at bus 5137
 	#Look at bus 4412. Compare the voltage magnitudes and angles of Tinley 72 and 74 and the impedances to figure out where is the mismatch coming from. Do this in Raw0414tmp_loadsplit.raw
