@@ -22,6 +22,12 @@ Logs:
 	
 	
 Solve issue:
+	generate a script which can map tf data
+	use it to do the following in Raw_loadsplit.raw:
+	274753,369,1->274753,400011,1
+	274754,369,1->274754,400011,1
+	274750,369,1->750083,400011,1
+	look at the comments in branchAutomation.py and think about them
 	#Make sure to fix the manual issues first, that of missing tf, multiple tf connected to a tf tertiary bus.
 	#Implement the strategies detalied in missingTFStrategy_ManualTFMapping.txt
 	Find a strategy to properly map the angles of taps in the 345 system. Look at the cases causing mismatch and try to find a pattern.

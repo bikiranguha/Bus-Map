@@ -2,7 +2,7 @@
 Script which deals with the tertiary of transformers
 By dealing, i mean they are mapped to the tf primary if they do not have load or any other branches
 """
-
+import shutil
 
 latestRaw = 'RAW0501.raw'
 tertiaryMap = 'tertiaryMap.txt'
@@ -144,3 +144,6 @@ newRawFile = 'RAW0501.raw'
 originalCase = 'CAPE'
 changeFile = tertiaryMap
 MapChange(planningRaw,changeFile,CAPERaw,newRawFile,originalCase)
+
+destTFData = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders\Automate 345 kV mapping/'
+shutil.copy(newRawFile,destTFData)

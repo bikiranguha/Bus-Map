@@ -20,13 +20,7 @@ with open(planningRaw, 'r') as f:
 		if len(words) <2:
 			continue
 		Bus = words[0].strip()
-		#BusVolt = float(words[2].strip())
-		#angle = float(words[8].strip())
 		area = words[4].strip()
-		#AreaDict[Bus] = area
 
 		if area == '222':
-			#BusAngleDict[Bus] = angle
-			#BusVoltDict[Bus] = BusVolt
-			#ComedBusSet.add(Bus)
 			planningBusDataDict[Bus] = line
