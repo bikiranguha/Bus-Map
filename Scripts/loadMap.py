@@ -2,6 +2,7 @@
 # handle the load mapping by getting planning tf conn and corresponding CAPE tf conn
 # handle the tf mapping in the same way
 # handle the bus mapping
+import shutil
 
 mapFile = 'autoTFMap0505.txt'
 CAPERaw = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Island 34 system' + '/' + 'Raw0414tmp_loadsplit.raw'
@@ -380,3 +381,6 @@ with open(newRaw,'w') as f:
 
 
 
+# copy to the given location
+destTFData = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders\Automate 345 kV mapping/'
+shutil.copy(newRaw,destTFData)

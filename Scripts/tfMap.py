@@ -2,10 +2,10 @@
 Look at mapFile and change the tf data accordingly (ie, map the planning tf data and the corresponding buses)
 Generate newRaw from CAPERaw with the new mapping
 """
+import shutil
 
-mapFile = 'matchTFData.txt'
-CAPERaw = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Island 34 system' + '/' + 'Raw0414tmp_loadsplit.raw'
-newRaw = 'Raw0414tmp_loadsplitTFTest.raw'
+mapFile = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Automate 345 kV mapping/' + 'matchTFData.txt'
+CAPERaw = 'RAW0501.raw'
 #mapFile = 'testMaptmp.txt'
 from checkLoadSplit import BusVoltDict as planningBusVoltDict
 from loadSplitCAPE import BusVoltDict as CAPEBusVoltDict, BusZoneDict as CAPEBusZoneDict
@@ -257,7 +257,7 @@ for i in range(tfEndIndex,len(fileLines)):
 
 
 # generate new raw file
-with open(newRaw,'w') as f:
+with open(CAPERaw,'w') as f:
 	f.write('0,   100.00, 33, 1, 1, 60.00     / PSS(R)E-33.3    TUE, DEC 13 2016  22:08')
 	f.write('\n')
 	f.write('COMED 2018,  HLS18V1, N18S OUTSIDE AND 18 INTCHNG')
@@ -269,4 +269,5 @@ with open(newRaw,'w') as f:
 		f.write('\n')
 
 
-
+destTFData = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders\Automate 345 kV mapping/'
+shutil.copy(CAPERaw,destTFData)

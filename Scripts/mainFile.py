@@ -1,12 +1,11 @@
-#CAPERaw = 'CAPE_RAW0228v33.raw'
+import shutil
+latestRaw = 'RAW0501.raw'
 
-import mapAndcopyGen # map and copy gen data
-import map345 # map 345 kv buses
-import mapRemainingBus # map all buses
-import changebranchDatav3 # generate new branch data
-import changetfDatav4 # generate new transformer data
-import mapLoad # generate new load data
-#import loadConflictResolution
-import findShuntv2 # generate new switched shunt data
-import cutoutComed
-import compileAll0322
+import tryNumericTFMatching # automation of Load TF matching, as well as incorporating cases identified by Manual Map CS
+import loadMap # script which does the maps by looking at newMapFile
+import dealWithTFTer # maps all the TF tertiaries to their primaries
+import checkMapping # checks for consistency of the manual maps in testMapOld and ManualMapCSPriority1 with that of autoTFMap
+import tfMap # do tf maps specified in  matchTFData.txt
+
+destTFData = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders\Automate 345 kV mapping/'
+shutil.copy(latestRaw,destTFData)

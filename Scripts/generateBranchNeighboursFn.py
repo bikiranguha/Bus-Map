@@ -1,3 +1,7 @@
+"""
+Provides a function which organizes the branch impedance and tf impedance data into a class
+"""
+
 import math
 
 
@@ -77,6 +81,8 @@ def generateNeighbours(Raw):
 
 
 	return BranchNeighbourDict, BranchDataDict
+
+	
 
 
 
