@@ -1,6 +1,12 @@
-import math
+"""
+Note: CAN only be used for Raw files where there are no 3 winders
+"""
+
+
 
 def getBranchTFData(Raw):
+	import math
+	import sys
 	# generates a structure which stores all the branch and tf impedance info
 
 	ComedBusSet = set()
@@ -12,6 +18,7 @@ def getBranchTFData(Raw):
 			self.R = []
 			self.X = []
 			self.Z = []
+			self.IsBranch = []
 
 	def parallel(Z1,Z2):
 		# calculate parallel impedance
@@ -24,7 +31,7 @@ def getBranchTFData(Raw):
 		return Zp
 
 
-	def getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict):
+	def getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict,IsBranch):
 		# generate branch impedance info structure
 		Z = math.sqrt(R**2 + X**2)
 		if Bus1 not in BranchTFDataDict.keys():
@@ -34,8 +41,9 @@ def getBranchTFData(Raw):
 			BranchTFDataDict[Bus1].R.append(R)
 			BranchTFDataDict[Bus1].X.append(X)
 			BranchTFDataDict[Bus1].Z.append(Z)
+			BranchTFDataDict[Bus1].IsBranch.append(IsBranch)
 		else: # Bus 2 already had another branch connection to Bus 1
-			print Bus1 + ',' + Bus2
+			#print Bus1 + ',' + Bus2
 			ind = BranchTFDataDict[Bus1].toBus.index(Bus2)
 			OldR = BranchTFDataDict[Bus1].R[ind]
 			OldX = BranchTFDataDict[Bus1].X[ind]
@@ -46,6 +54,7 @@ def getBranchTFData(Raw):
 			BranchTFDataDict[Bus1].R[ind] = Rp
 			BranchTFDataDict[Bus1].X[ind] = Xp
 			BranchTFDataDict[Bus1].Z[ind] = Zp
+			
 
 
 	##############
@@ -70,7 +79,7 @@ def getBranchTFData(Raw):
 		#AreaDict[Bus] = area
 
 
-	print 'List of branches or tf which constitute parallel connections between two buses:'
+	#print 'List of branches or tf which constitute parallel connections between two buses:'
 	# extract branch impedance data
 	branchStartIndex = fileLines.index('0 / END OF GENERATOR DATA, BEGIN BRANCH DATA') + 1
 	branchEndIndex = fileLines.index('0 / END OF BRANCH DATA, BEGIN TRANSFORMER DATA')
@@ -86,8 +95,8 @@ def getBranchTFData(Raw):
 			if status == '1':
 				R = float(words[3].strip())
 				X = float(words[4].strip())
-				getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict)
-				getBranchTFInfo(Bus2,Bus1,R,X,BranchTFDataDict)
+				getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict,1)
+				getBranchTFInfo(Bus2,Bus1,R,X,BranchTFDataDict,1)
 
 
 	# extract tf impedance data
@@ -100,7 +109,10 @@ def getBranchTFData(Raw):
 		Bus1 = words[0].strip()
 		Bus2 = words[1].strip()
 		Bus3 = words[2].strip()
-		status = words[11].strip()
+		try:
+			status = words[11].strip()
+		except:
+			sys.exit("This function can only be used on a raw file where there are no 3 winder tf.")
 		CZ = words[5].strip()
 
 
@@ -123,8 +135,8 @@ def getBranchTFData(Raw):
 			R = R*100.0/Sbase # convert to a base of 100 MVA
 			X = X*100.0/Sbase # convert to a base of 100 MVA
 
-			getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict)
-			getBranchTFInfo(Bus2,Bus1,R,X,BranchTFDataDict)
+			getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict,0)
+			getBranchTFInfo(Bus2,Bus1,R,X,BranchTFDataDict,0)
 			i+=3
 		else: # tf is off
 			i+=4

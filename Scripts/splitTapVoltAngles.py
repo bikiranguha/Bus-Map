@@ -6,8 +6,8 @@ Also splits voltages of taps according to the same ratio
 
 from generateNeighbourImpedanceData import getBranchTFData
 from Queue import Queue
-Raw = 'RAW0509_test.raw'
-newRawFile = 'RAW0509_test_tmp.raw'
+Raw = 'RAW0509_tmp.raw'
+newRawFile = 'RAW0509_tmp2.raw'
 angleChangeFile = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/' +  'logAngleChange.txt'
 BranchTFDataDict = getBranchTFData(Raw)
 ParentDict = {} # key: origin node, value: branch node
@@ -30,11 +30,14 @@ def reconstructLine2(words):
 
 # use BranchTFDataDict and BFS Search Algorithm to get the angle splits for any taps in between two specified endpoints
 # use ParentDict concept to keep track
-endpoints = [750144,274678] # 1st index is the starting point, 2nd index is the endpoint
-#endpoints = [834,4228]
+endpoints = [750354,1701] # 1st index is the starting point, 2nd index is the endpoint
+tap_bus = '5079' # the tap bus
+
+
+
 start = str(endpoints[0]) # chosen origin node
 end = str(endpoints[1]) # chosen endpoint node
-tap_bus = '5368' # the tap bus
+
 
 
 # Read the angle change values and generate a dict

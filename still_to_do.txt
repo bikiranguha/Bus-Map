@@ -22,12 +22,19 @@ Logs:
 	
 	
 Solve issue:
+	Continue working on automateTry1.py:
+		Currently, it tries to map all mismatches. This fails when the branch (or tf) does not exist. Maybe restrict it to branches.
+		The main problem is to identify when the mappings are right or wrong.
+	Improve onelinediagramv2.py so that it shows the entire tf data.
+	Include tfMap.py inside manualMapper.py so that it can do tf mapping when it appears inside mapping_confirmed.txt. Make sure any tf mapping comes before tap angle splitting.
+	Think about including all the mappings inside autoTFmap0505.txt into mapping_priority1
+	#Implement the comments in automateTry1.py
 	#Modify manual_mapper so it can handle branch impedance changes too
 	Write a script which can handle cases of mapping angles in between fict taps in between two real buses
 	#Implement changes for case 1823
 	#finish implementing the comments in organizeManualMapping.py
 	#for all the manual maps just organized, make sure that the mismatches are small
-	continue with branchAutomation.py, by starting the maps of no mismatch 345 buses and their ties
+	#continue with branchAutomation.py, by starting the maps of no mismatch 345 buses and their ties
 	#generate a script which can map tf data
 	#use it to do the following in Raw_loadsplit.raw:
 	#274753,369,1->274753,400011,1
