@@ -22,15 +22,48 @@ Logs:
 	
 	
 Solve issue:
-	Continue working on automateTry1.py:
-		Currently, it tries to map all mismatches. This fails when the branch (or tf) does not exist. Maybe restrict it to branches.
-		The main problem is to identify when the mappings are right or wrong.
-	Improve onelinediagramv2.py so that it shows the entire tf data.
-	Include tfMap.py inside manualMapper.py so that it can do tf mapping when it appears inside mapping_confirmed.txt. Make sure any tf mapping comes before tap angle splitting.
+	#Work on a function which will generate depth n neighbour data dict:
+	#	It should have info about the to bus in depth n
+	#	It should have info about total impedance from originating bus to depth n
+	#	It should have a list whose first element is the originating bus, and the final element is the depth n bus.
+	Improve the depth 1 branch impedance matching script (branchAutomation.py):
+		Try to check different aspects of the code by looking at other case studies 
+		Make sure to get all the branch groups in Planning, to avoid trying to match them. Look at combo 270797,270796 as reference
+		#Deal with cases where multiple potential maps exist at a certain depth, use name matching
+		Even for cases of only one potential mismatch, try to implement cross-verification through name matching. However, for this, all non-cape buses connected
+		to Comed boundary buses need to be added to the name matching results.
+		Have a system in place which can keep track of which branches have already been mapped in planning, so that they are not matched again
+		#Use getNeighboursAtCertainDepthFn.py to implement the running sum concept of impedance matching
+		#Apply the running sum concept for impedance matching
+		#If multiple matches exist, then use the name-match dictionary to help with identifying the correct match.
+		#Look for other comments inside the file to be carried out
+	Work on deleting the mismatch at Bus 5286. Look at the following instructions:
+		The branch flow calculation from planning will tell you the real power and reactive power supplied to the substation.  
+		Then, with the complex voltage at the substation, you can calculate the current supplied to the substation.  Then, you can calculate the complex voltage at the sending end of the line section.  
+		Then, you can calculate the current supplied by the tf to the line section.  
+		Then you can repeat the process to determine the complex voltage at the generator bus.
+
+	#Improve the substation name match results so that they are ranked according to priority, make sure to only print the substation names csv, no need for the parentheses
+	#Generate two name match results: one with high threshold and one with low threshold
+	
+	Improve onelinediagramv3 so that it also shows all the buses the planning case maps too
+	
+	Bus 750221 (connected to bus 5286) needs to be remapped. Currently, its mapped to 5286
+	#Include tfMap.py inside manualMapper.py so that it can do tf mapping when it appears inside mapping_confirmed.txt. Make sure any tf mapping comes before tap angle splitting.
+	Figure out the mappings of the cases in tfMismatchIssues.txt
+	#Try to write a script which does the following:
+	#	Identifies all the buses which have mismatches more than 1000 MVA, which are LV buses and which are connected to step up tf
+	#	If these buses are not mapped in the manual maps, list these cases.
+	#For all the high mismatches (>1000 MVA), try investigating the idea of looking at a depth of 1 for buses which also show significant mismatch.
+
+	#Improve onelinediagramv2.py so that it shows the entire tf data.
+	#Continue working on automateTry1.py:
+	#	Currently, it tries to map all mismatches. This fails when the branch (or tf) does not exist. Maybe restrict it to branches.
+	#	The main problem is to identify when the mappings are right or wrong.	
 	Think about including all the mappings inside autoTFmap0505.txt into mapping_priority1
 	#Implement the comments in automateTry1.py
 	#Modify manual_mapper so it can handle branch impedance changes too
-	Write a script which can handle cases of mapping angles in between fict taps in between two real buses
+	#Write a script which can handle cases of mapping angles in between fict taps in between two real buses
 	#Implement changes for case 1823
 	#finish implementing the comments in organizeManualMapping.py
 	#for all the manual maps just organized, make sure that the mismatches are small

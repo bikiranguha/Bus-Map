@@ -10,11 +10,12 @@ sys.path.insert(0,'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Do
 from generateNeighbourImpedanceData import getBranchTFData # helps get organized branch (and tf) impedance data
 from updatedMaps import MapDictNew, MapDictOld # needed to scan mappings and compare branch data (between CAPE and planning)
 from getBusDataFn import getBusData # function to all relevant bus data given the raw file
+from getBranchGroupFn import makeBranchGroups # to help with identifying all the fringe buses causing mismatch
 flowReport = 'BusReports_RAW0509.txt'
 sortedMismatchData = 'sortedMismatchData0509.txt'
 CAPERaw = 'RAW0509.raw'
 planningRaw = 'hls18v1dyn_1219.raw'
-getMaxFlowBranches = 'mismatchAnalysis.txt' # contains the mismatch info as well as some info about the branch which causes max mismatch
+getMaxFlowBranches = 'mismatchAnalysisv2.txt' # contains the mismatch info as well as some info about the branch which causes max mismatch
 flowDict = {}
 mismatchSet = set()
 areaList = []
@@ -22,7 +23,7 @@ exploredBranchSet = set() # set of branches already identified as the main cause
 mismatchAnalysis = [] # lines which will contain the max mismatch branch data as well as the total mismatch at the bus
 BusDataCAPE = getBusData(CAPERaw) # contains all the bus data for all in-service buses in CAPE
 BusDataPlanning = getBusData(planningRaw) # contains all the bus data for all in-service buses in planning
-
+BusGroupData = makeBranchGroups(CAPERaw) # contains dict for every bus which has ties
 
 class mismatchReport(object):
 	def __init__(self):
@@ -204,7 +205,7 @@ for ind in indices:
 		else:
 			break
 
-
+"""
 # analyse the mismatch and get the branch which has the highest MVA
 for Bus in flowDict.keys():
 	if flowDict[Bus].MismatchMVA < 1000:
@@ -221,6 +222,27 @@ for Bus in flowDict.keys():
 		exploredBranchSet.add(currentBranch)
 		string = Bus + ',' + to + ',' + str(maxMismatch) + ',' + str(flowDict[Bus].MismatchMVA)
 		mismatchAnalysis.append(string)
+"""
+
+for Bus in flowDict.keys():
+	if flowDict[Bus].MismatchMVA < 1000:
+		continue
+	toBusList = flowDict[Bus].toBus
+
+	for nBus in toBusList:
+		if nBus in flowDict.keys():
+			nBusInd = flowDict[Bus].toBus.index(nBus)
+			if flowDict[Bus].MVAList[nBusInd] > 1000 and flowDict[nBus].MismatchMVA > 500:
+				currentBranch = Bus + ',' + nBus
+				currentBranchReverse = nBus + ',' + Bus
+				if currentBranch in exploredBranchSet or currentBranchReverse in exploredBranchSet: # branch already included
+					continue
+				exploredBranchSet.add(currentBranch)
+				string = Bus + ',' + nBus + ',' + str(flowDict[Bus].MVAList[nBusInd]) + ',' + str(flowDict[Bus].MismatchMVA)
+				mismatchAnalysis.append(string)
+		else: # no mismatch seen at this nBus
+			continue
+
 
 
 # get the mapping dict (including all manual mapping)
@@ -258,7 +280,10 @@ for branch in list(exploredBranchSet):
 		planningZ = BranchTFDataDictPlanning[planningBus1].Z[toBusIndex]	
 	except: # no direct branch connection in planning
 		partialString = printBusData(CAPEBus1,CAPEBus2,BusDataCAPE)
+		partialString += ',' + printBusData(planningBus1,planningBus2,BusDataPlanning)
 		string = partialString + ',' + 'No direct branch connection in planning'
+		if CAPEBus1 in BusGroupData.keys() or CAPEBus2 in BusGroupData.keys():
+			string += ',One of the CAPE Buses has ties'
 		print string
 		tryMatchImpedance(CAPEZ,planningBus1)
 		tryMatchImpedance(CAPEZ,planningBus2)
@@ -270,6 +295,8 @@ for branch in list(exploredBranchSet):
 		partialString = printBusData(CAPEBus1,CAPEBus2,BusDataCAPE)
 		partialString += ',' +  printBusData(planningBus1,planningBus2,BusDataPlanning)
 		string = partialString + ',' + str(CAPEZ) + ',' + str(planningZ)
+		if CAPEBus1 in BusGroupData.keys() or CAPEBus2 in BusGroupData.keys():
+			string += ',One of the CAPE Buses has ties'
 		print string
 		tryMatchImpedance(CAPEZ,planningBus1)
 		tryMatchImpedance(CAPEZ,planningBus2)

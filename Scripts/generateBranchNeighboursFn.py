@@ -12,7 +12,7 @@ def generateNeighbours(Raw):
 			self.toBus = []
 			self.R = []
 			self.X = []
-			self.cktID = []
+			#self.cktID = []
 			self.Z = []
 
 
@@ -25,16 +25,42 @@ def generateNeighbours(Raw):
 			NeighbourDict[Bus] = []
 		NeighbourDict[Bus].append(NeighbourBus)
 
-	def generateBranchData(BranchDataDict,Bus1,Bus2,cktID,R,X):
+	def parallel(Z1,Z2):
+		# calculate parallel impedance
+		if Z1 == 0.0:
+			Zp = Z2
+		elif Z2 == 0.0:
+			Zp = Z1
+		else:
+			Zp = (Z1*Z2)/(Z1+Z2)
+		return Zp
+
+
+	def generateBranchData(BranchDataDict,Bus1,Bus2,R,X,Z):
 		if Bus1 not in BranchDataDict.keys():
 			BranchDataDict[Bus1] = BranchData()
 
-		BranchDataDict[Bus1].toBus.append(Bus2)
-		BranchDataDict[Bus1].R.append(R)
-		BranchDataDict[Bus1].X.append(X)
-		BranchDataDict[Bus1].Z.append(Z)
-		BranchDataDict[Bus1].cktID.append(cktID)
+		if Bus2 not in BranchDataDict[Bus1].toBus:
+			BranchDataDict[Bus1].toBus.append(Bus2)
+			BranchDataDict[Bus1].R.append(R)
+			BranchDataDict[Bus1].X.append(X)
+			BranchDataDict[Bus1].Z.append(Z)
+		else: # parallel branch
+			Bus2Index = BranchDataDict[Bus1].toBus.index(Bus2)
+			OldR = BranchDataDict[Bus1].R[Bus2Index]
+			OldX = BranchDataDict[Bus1].X[Bus2Index]
+			OldZ = BranchDataDict[Bus1].Z[Bus2Index]
+
+			Rp = parallel(OldR,R)
+			Xp = parallel(OldX,X)
+			Zp = parallel(OldZ,Z)
+
+			BranchDataDict[Bus1].R.append(Rp)
+			BranchDataDict[Bus1].X.append(Xp)
+			BranchDataDict[Bus1].Z.append(Zp)
+
 		return BranchDataDict
+
 
 
 
@@ -69,15 +95,15 @@ def generateNeighbours(Raw):
 
 			if Bus1 in ComedBusSet or Bus2 in ComedBusSet:
 				if status == '1':
-					cktID = words[2].strip("'")
+					#cktID = words[2].strip("'")
 					R = float(words[3].strip())
 					X = float(words[4].strip())
 					Z = math.sqrt(R**2 + X**2)
 
 					BusAppend(Bus1,Bus2,BranchNeighbourDict)
 					BusAppend(Bus2,Bus1,BranchNeighbourDict)
-					BranchDataDict = generateBranchData(BranchDataDict,Bus1,Bus2,cktID,R,X)
-					BranchDataDict = generateBranchData(BranchDataDict,Bus2,Bus1,cktID,R,X)
+					BranchDataDict = generateBranchData(BranchDataDict,Bus1,Bus2,R,X,Z)
+					BranchDataDict = generateBranchData(BranchDataDict,Bus2,Bus1,R,X,Z)
 
 
 	return BranchNeighbourDict, BranchDataDict

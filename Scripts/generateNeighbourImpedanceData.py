@@ -1,13 +1,16 @@
 """
+Organizes Branch or TF impedance data within a  proper class structure
 Note: CAN only be used for Raw files where there are no 3 winders
 """
 
 
 
+
 def getBranchTFData(Raw):
+
+	# generates a structure which stores all the branch and tf impedance info
 	import math
 	import sys
-	# generates a structure which stores all the branch and tf impedance info
 
 	ComedBusSet = set()
 	BranchTFDataDict = {}
@@ -29,6 +32,28 @@ def getBranchTFData(Raw):
 		else:
 			Zp = (Z1*Z2)/(Z1+Z2)
 		return Zp
+
+	def generateProperImpedance(CZ,R,X,Sbase,Base12):
+		# Sbase: System base, Base12: tf base
+		# if CZ == '1', no need to change
+
+		if CZ == '2':
+			Base = Base12 # tf base
+			R = R/Base12*Sbase
+			X = X/Base12*Sbase
+
+		elif CZ == '3':
+			# R is the power loss, X is the branch impedance magnitude
+			Base = Base12
+			R = ((R/10**6)*Sbase/(Base**2))
+			Z = X*Sbase/Base
+			X = math.sqrt(Z**2 - R**2)
+
+		return R,X
+
+
+
+
 
 
 	def getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict,IsBranch):
@@ -126,7 +151,10 @@ def getBranchTFData(Raw):
 			words = line.split(',')
 			R = float(words[0].strip())
 			X = float(words[1].strip())
-
+			Base12 = float(words[2].strip())
+			Sbase = 100.0 # system base
+			R,X = generateProperImpedance(CZ,R,X,Sbase,Base12)
+			"""
 			if CZ == '1':
 				Sbase = 100.0
 			else:
@@ -134,6 +162,7 @@ def getBranchTFData(Raw):
 
 			R = R*100.0/Sbase # convert to a base of 100 MVA
 			X = X*100.0/Sbase # convert to a base of 100 MVA
+			"""
 
 			getBranchTFInfo(Bus1,Bus2,R,X,BranchTFDataDict,0)
 			getBranchTFInfo(Bus2,Bus1,R,X,BranchTFDataDict,0)
@@ -143,3 +172,13 @@ def getBranchTFData(Raw):
 
 
 	return BranchTFDataDict
+
+if __name__ == "__main__":
+	R = 5.19310E+5
+	X = 8.99000E-2
+	Base12 = 420.00
+	Sbase = 100.0
+	CZ = '3'
+	R,X = generateProperImpedance(CZ,R,X,Sbase,Base12)
+	print R 
+	print X
