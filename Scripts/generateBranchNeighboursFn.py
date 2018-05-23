@@ -55,9 +55,9 @@ def generateNeighbours(Raw):
 			Xp = parallel(OldX,X)
 			Zp = parallel(OldZ,Z)
 
-			BranchDataDict[Bus1].R.append(Rp)
-			BranchDataDict[Bus1].X.append(Xp)
-			BranchDataDict[Bus1].Z.append(Zp)
+			BranchDataDict[Bus1].R[Bus2Index] = Rp
+			BranchDataDict[Bus1].X[Bus2Index] = Xp
+			BranchDataDict[Bus1].Z[Bus2Index] = Zp
 
 		return BranchDataDict
 

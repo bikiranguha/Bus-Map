@@ -99,7 +99,7 @@ def getNeighboursDepthN(OriginBus,Raw,maxDepth):
 				#neighbourcktID = DepthOneBranchDataDict[currentBus].cktID[neighbourInd]
 
 
-				if neighbourDepth <= maxDepth:
+				if neighbourDepth <= maxDepth and neighbourPathStr not in MultDepthBranchDataDict[OriginBus].Path : # dont add if path has already been included
 					# append all data
 					MultDepthBranchDataDict[OriginBus].toBus.append(neighbour)
 					MultDepthBranchDataDict[OriginBus].depth.append(neighbourDepth)
@@ -120,7 +120,7 @@ def getNeighboursDepthN(OriginBus,Raw,maxDepth):
 
 if __name__ == '__main__':
 	Raw = 'Raw0509.raw'
-	nDepthDict = getNeighboursDepthN('750221',Raw,3)
+	nDepthDict = getNeighboursDepthN('750221',Raw,5)
 	for key in nDepthDict.keys():
 		print nDepthDict[key].toBus
 		print nDepthDict[key].X

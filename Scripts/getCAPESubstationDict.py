@@ -29,7 +29,7 @@ with open(changeLog,'r') as f:
             continue
         OldBus = words[0].strip()
         NewBus = words[1].strip()
-        changeOldToNewDict[NewBus] = OldBus
+        changeOldToNewDict[OldBus] = NewBus
 
 
 with open(substationFile,'r') as f:
@@ -74,13 +74,23 @@ with open(substationFile,'r') as f:
 
     		if subName not in SubStationDictOld.keys():
     			SubStationDictOld[subName] = []
+
+
+            SubStationDictOld[subName].append(BusNumber)
+            if subName not in SubStationDictNew.keys():
                 SubStationDictNew[subName] = []
 
-    		SubStationDictOld[subName].append(BusNumber)
+    		
 
             if BusNumber in changeOldToNewDict.keys():
+                #print 'Yay!'
                 NewBusNumber = changeOldToNewDict[BusNumber]
                 SubStationDictNew[subName].append(NewBusNumber)
             else:
                 SubStationDictNew[subName].append(BusNumber)
-    		#print subName
+
+with open('tmpSubData.txt','w') as f:
+    for key in SubStationDictOld.keys():
+        string = key + '->' + str(SubStationDictOld[key])
+        f.write(string)
+        f.write('\n')

@@ -49,6 +49,13 @@ BusDataDict = getBusData(CAPERaw)
  
 
 
+
+
+def printUsefulMappingOutput(originBus,CAPEneighbour,planningBus,planningNeighbour,searchDepth):
+	# output mapping info which helps in checking its validity, originBus: CAPE origin bus, CAPEneighbour: CAPE to bus, planningBus: planning from Bus, planningNeighbour: planning to bus
+	# searchDepth: depth from CAPE to and from bus
+	print CAPEneighbour + '->' + str(autoMapDict[CAPEneighbour]) + '\t' + planningBus + ',' + planningNeighbour + ',' + originBus + ',' + CAPEneighbour + ',' + str(searchDepth)
+
 def scanNeighbourDepth(MultDepthBranchDataDict,CAPEBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,planningNeighbourZ):
 	# scan given depth of CAPEBus neighbours to try and get potentialMaps
 	for neighbour in MultDepthBranchDataDict[CAPEBus].toBus:
@@ -72,7 +79,7 @@ def scanNeighbourDepth(MultDepthBranchDataDict,CAPEBus,currentDepth,maxDepth,pot
 
 	return potentialMaps
 
-def getProperMapping(potentialMaps, planningNeighbour,searchDepth,originBus):
+def getProperMapping(potentialMaps, planningNeighbour,searchDepth,originBus,planningBus):
 	# handle situations when there is one or more maps
 	skip = False
 	if len(potentialMaps) == 1:
@@ -85,7 +92,7 @@ def getProperMapping(potentialMaps, planningNeighbour,searchDepth,originBus):
 				planningTies = TieDict[planningNeighbour]
 				for planningTie in planningTies:
 					autoMapDict[CAPEneighbour].append(planningTie)
-			print CAPEneighbour + '->' + str(autoMapDict[CAPEneighbour]) + ',' + 'Search Depth: ' + str(searchDepth) + ' of originBus: ' + originBus
+			printUsefulMappingOutput(originBus,CAPEneighbour,planningBus,planningNeighbour,searchDepth)
 			autoMappedSet.add(CAPEneighbour)
 
 		try:
@@ -114,7 +121,7 @@ def getProperMapping(potentialMaps, planningNeighbour,searchDepth,originBus):
 							planningTies = TieDict[planningNeighbour]
 							for planningTie in planningTies:
 								autoMapDict[CAPEneighbour].append(planningTie)
-						print CAPEneighbour + '->' + str(autoMapDict[CAPEneighbour]) + ',' + 'Search Depth: ' + str(searchDepth) + ' of originBus: ' + originBus
+						printUsefulMappingOutput(originBus,CAPEneighbour,planningBus,planningNeighbour,searchDepth)
 						autoMappedSet.add(CAPEneighbour)
 						break
 			skip = True
@@ -233,21 +240,21 @@ while not frontier.empty():
 			planningNeighbourInd = PlanningBranchList.index(planningNeighbour)
 			PlanningBranchZ = BranchDataDictPlanning[planningBus].Z[planningNeighbourInd]
 			potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,currentBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
-			skip = getProperMapping(potentialMaps, planningNeighbour,1,currentBus)
+			skip = getProperMapping(potentialMaps, planningNeighbour,1,currentBus,planningBus)
 			if skip == True:
 				continue
 
 			# no match found in depth 1, continue to depth 2
 			currentDepth +=1
 			potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,currentBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
-			skip = getProperMapping(potentialMaps, planningNeighbour,2,currentBus)
+			skip = getProperMapping(potentialMaps, planningNeighbour,2,currentBus,planningBus)
 			if skip == True:
 				continue
 
 			# no match found in depth 2, continue to depth 3
 			currentDepth +=1
 			potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,currentBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
-			skip = getProperMapping(potentialMaps, planningNeighbour,3,currentBus)
+			skip = getProperMapping(potentialMaps, planningNeighbour,3,currentBus,planningBus)
 			if skip == True:
 				continue
 
@@ -263,11 +270,12 @@ for key in autoMapDict.keys():
 	print string
 
 """
-
+"""
+# get a list of all the unmapped buses
 for n in list(NeighbourSetDepth5):
 	if n not in autoMappedSet:
 		print 'Neighbour ' + n + ' has not been mapped yet by this script.'
-
+"""
 
 print 'Please note that the map generated here should only be used for bus mapping, not load or tf mapping'
 

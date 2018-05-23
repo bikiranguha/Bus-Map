@@ -22,6 +22,7 @@ Logs:
 	
 	
 Solve issue:
+	Figure out the mappings of the cases in tfMismatchIssues.txt
 	#Work on a function which will generate depth n neighbour data dict:
 	#	It should have info about the to bus in depth n
 	#	It should have info about total impedance from originating bus to depth n
@@ -50,7 +51,7 @@ Solve issue:
 	
 	Bus 750221 (connected to bus 5286) needs to be remapped. Currently, its mapped to 5286
 	#Include tfMap.py inside manualMapper.py so that it can do tf mapping when it appears inside mapping_confirmed.txt. Make sure any tf mapping comes before tap angle splitting.
-	Figure out the mappings of the cases in tfMismatchIssues.txt
+	
 	#Try to write a script which does the following:
 	#	Identifies all the buses which have mismatches more than 1000 MVA, which are LV buses and which are connected to step up tf
 	#	If these buses are not mapped in the manual maps, list these cases.
