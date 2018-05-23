@@ -2,17 +2,18 @@
 	Function to generate a dictionary which will contain a list of ties of the bus. 
 	Bus will not be present in keys if no ties connected to it
 """
-#import math
+import math
+from Queue import Queue
 #import sys
 #sys.path.insert(0,'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2')
 #from getBusDataFn import getBusData
 
 highImpedanceTieList = []
 
-def makeBranchGroups(Raw):
+def makeBranchGroups(planningRaw):
 	BranchGroupDict = {}
 	#BranchGroupList = []
-	with open(Raw,'r') as f:
+	with open(planningRaw,'r') as f:
 		filecontent = f.read()
 		fileLines = filecontent.split('\n')
 		branchStartIndex = fileLines.index('0 / END OF GENERATOR DATA, BEGIN BRANCH DATA')+1
@@ -20,13 +21,13 @@ def makeBranchGroups(Raw):
 		#BusDataDict = getBusData(Raw)
 		for i in range(branchStartIndex,branchEndIndex): # search through branch data
 			words = fileLines[i].split(',')
-			BranchCode = words[2].strip()
-			#R = float(words[3].strip())
-			#X = float(words[4].strip())
-			#Z = math.sqrt(R**2 + X**2)
+			#BranchCode = words[2].strip()
+			R = float(words[3].strip())
+			X = float(words[4].strip())
+			Z = math.sqrt(R**2 + X**2)
 			status = words[-5].strip()
 
-			if BranchCode == "'99'" and status == '1':
+			if Z <= 1e-4 and status == '1':
 
 				Bus1 = words[0].strip()
 				Bus2 = words[1].strip()
@@ -47,34 +48,41 @@ def makeBranchGroups(Raw):
 					BranchGroupDict[Bus2] = set()
 				BranchGroupDict[Bus2].add(Bus1)
 
-				"""
-				# add ties of ties for both Bus1 and Bus2
-				for Bus in list(BranchGroupDict[Bus1]):
-					if Bus != Bus2:
-						BranchGroupDict[Bus2].add(Bus)
+		
+		# get complete bus groups
+		CompleteBranchGroupDict = {} # each bus has the full bus group as a set
 
-				for Bus in list(BranchGroupDict[Bus2]):
-					if Bus != Bus1:
-						BranchGroupDict[Bus1].add(Bus)
-				"""
+		for Bus in BranchGroupDict.keys(): # scan each key and generates a full bus group set
+			if Bus in CompleteBranchGroupDict.keys(): # Bus already has the group, so skip
+				continue
+			frontier = Queue(maxsize=0)
+			frontier.put(Bus)
+			BusGroup = set()
 
-		for Bus in BranchGroupDict.keys():
-			ties = list(BranchGroupDict[Bus])
-			moreTies = set()
-			for tie in ties:
-				tieSet = BranchGroupDict[tie]
-				for t in list(tieSet):
-					moreTies.add(t)
-			for t in list(moreTies):
-				BranchGroupDict[Bus].add(t)
+			# do something similar to BFS
+			while not frontier.empty():
+				currentBus = frontier.get()
+				frontier.task_done()
+
+				BusGroup.add(currentBus)
+
+				ties = BranchGroupDict[currentBus]
+
+				for tie in ties:
+					if tie not in BusGroup:
+						frontier.put(tie)
+						BusGroup.add(tie)
+			####
+			for t in list(BusGroup):
+				CompleteBranchGroupDict[t] = BusGroup
 
 
 
-	return BranchGroupDict
+	return CompleteBranchGroupDict
 
 if __name__ == "__main__":
-	Raw = 'RAW0501.raw'
-	BranchGroupDict = makeBranchGroups(Raw)
+	planningRaw = 'hls18v1dyn_1219.raw'
+	BranchGroupDict = makeBranchGroups(planningRaw)
 	
 	while True:
 		searchTerm = raw_input('Enter bus number whose list of ties you are looking for: ')

@@ -10,20 +10,20 @@ sys.path.insert(0,'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Do
 # Data import from other files
 from getBusDataFn import getBusData
 from generateBranchNeighboursFn import generateNeighbours # function which generates in-service branch neighbour dictionary given raw file
-from getBranchGroupFn import makeBranchGroups # this function will help map any ties to buses which are already mapped
+from getBranchGroupFn import makeBranchGroups as  makeBranchGroupsCAPE # this function will help map any ties to buses which are already mapped
 from getNeighboursAtCertainDepthFn import getNeighboursDepthN
 from getBusNameDict import BusNum2SubNameDict # value: 345 Planning Bus number, value: corresponding CAPE substation name
 from getCAPESubstationDict import SubStationDictNew # key: substation name, value: list of all buses (new bus numbers) belonging to the substation
 from Queue import Queue
 #from getBranchGroupsPlanning import BranchGroupDictPlanning # needed to look at ties of planning bus for more mapping
-from getBranchGroupFnPlanning import makeBranchGroups # function to generate a group of ties (including itself) of the bus given as key
+from getBranchGroupFnPlanning import makeBranchGroups as makeBranchGroupsPlanning # function to generate a group of ties (including itself) of the bus given as key
 ######################################
 
 
 # External files being used
 CAPERaw = 'Raw0509.raw'
 planningRaw = 'hls18v1dyn_new.raw'
-ManualMapFile = 'test_branch_comparison4.txt'
+ManualMapFile = 'test_branch_comparison3.txt'
 
 
 
@@ -45,11 +45,11 @@ planningExplored = set()
 
 
 # get all the ties to buses which have no mismatch
-BranchGroupDict = makeBranchGroups(CAPERaw) # every value here is a set
+BranchGroupDict = makeBranchGroupsCAPE(CAPERaw) # every value here is a set
 #_, BranchDataDictCAPE = generateNeighbours(CAPERaw)
 _, BranchDataDictPlanning = generateNeighbours(planningRaw)
 BusDataDict = getBusData(CAPERaw)
-BranchGroupDictPlanning = makeBranchGroups(planningRaw)
+BranchGroupDictPlanning = makeBranchGroupsPlanning(planningRaw)
 
 
 
@@ -59,9 +59,9 @@ def printUsefulMappingOutput(originBus,CAPEneighbour,planningBus,planningNeighbo
 	# searchDepth: depth from CAPE to and from bus
 	print CAPEneighbour + '->' + str(autoMapDict[CAPEneighbour]) + '\t' + planningBus + ',' + planningNeighbour + ',' + originBus + ',' + CAPEneighbour + ',' + str(searchDepth)
 
-def scanNeighbourDepth(MultDepthBranchDataDict,CAPEBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,planningNeighbourZ):
+def scanNeighbourDepth(MultDepthBranchDataDict,Bus,currentDepth,maxDepth,potentialMaps,autoMappedSet,planningNeighbourZ):
 	# scan given depth of CAPEBus neighbours to try and get potentialMaps
-	for neighbour in MultDepthBranchDataDict[CAPEBus].toBus:
+	for neighbour in MultDepthBranchDataDict[Bus].toBus:
 		# scan every neighbour within maxDepth of CAPEBus
 		if currentDepth > maxDepth:
 			break
@@ -69,12 +69,12 @@ def scanNeighbourDepth(MultDepthBranchDataDict,CAPEBus,currentDepth,maxDepth,pot
 		if neighbour in autoMappedSet:
 			continue
 
-		neighbourInd = MultDepthBranchDataDict[CAPEBus].toBus.index(neighbour)
-		neighbourDepth = MultDepthBranchDataDict[CAPEBus].depth[neighbourInd]
+		neighbourInd = MultDepthBranchDataDict[Bus].toBus.index(neighbour)
+		neighbourDepth = MultDepthBranchDataDict[Bus].depth[neighbourInd]
 		if neighbourDepth != currentDepth:
 			continue 
 		
-		CAPEneighbourZ = MultDepthBranchDataDict[CAPEBus].Z[neighbourInd]
+		CAPEneighbourZ = MultDepthBranchDataDict[Bus].Z[neighbourInd]
 		error = abs((planningNeighbourZ - CAPEneighbourZ)/planningNeighbourZ)*100
 
 		if error < 5.0:
@@ -105,7 +105,7 @@ def getProperMapping(potentialMaps, planningNeighbour,searchDepth,originBus,plan
 				print planningNeighbour +  ' is an impedance match but not substation match to ' + CAPEneighbour + ',' + planningBus + ',' + originBus		
 		except: 
 			print planningNeighbour + ' has no substation info.'
-			#skip = True
+			skip = True
 			
 
 
@@ -206,19 +206,24 @@ while not frontier.empty():
 	# keep track of all the planning branches, so that they are not scanned twice
 
 	# map all the ties of this bus
-	MultDepthBranchDataDict =  getNeighboursDepthN(currentBus,CAPERaw,maxDepth) # dictionary with the currentBus as key and multi-depth branch data as class structure
+	#MultDepthBranchDataDict =  getNeighboursDepthN(currentBus,CAPERaw,maxDepth) # dictionary with the currentBus as key and multi-depth branch data as class structure
 	mappedPlanningNeighbour = set() # set of branch neighbours of the planning bus which are yet to be mapped
 	#stillToBeMappedPlanningNeighbour = [] # the name says it all
  	
-	planningBusSet = autoMapDict[currentBus] 
+	planningBusSet = autoMapDict[currentBus] # group of planning buses, if they are part of ties
+	currentBusGroup = set() # list of buses belonging to the tie group 
 	for planningBus in list(planningBusSet):
 		try: # see if there are any ties to this bus
 			CAPEBranchTies = list(BranchGroupDict[currentBus]) # get a list of all the ties, including the currentBus itself
 			for tie in CAPEBranchTies:
 				if tie != currentBus:
 					if tie not in explored and tie in NeighbourSetDepth5:
-						frontier.put(tie)
+						#frontier.put(tie)
+						# add to all the relevant tracking sets
+						currentBusGroup.add(tie)
 						autoMappedSet.add(tie)
+						explored.add(tie)
+						###
 						autoMapDict[tie] = set()
 						autoMapDict[tie].add(planningBus)
 						# map all ties of planning bus to this CAPE tie as well
@@ -226,7 +231,7 @@ while not frontier.empty():
 							planningTies = list(BranchGroupDictPlanning[planningBus])
 							for planningTie in planningTies:
 								autoMapDict[tie].add(planningTie)
-						print tie + '->' + str(autoMapDict[tie]) + ',' + 'Tie to  Bus:' + originBus
+						#print tie + '->' + str(autoMapDict[tie]) + ',' + 'Tie to  Bus:' + originBus
 						
 		except: # no ties to this bus
 			pass
@@ -251,29 +256,34 @@ while not frontier.empty():
 			planningExplored.add(planningBranchStrReverse)
 			###
 
-			currentDepth = 1 # initial depth
-			potentialMaps = []
-			planningNeighbourInd = PlanningBranchList.index(planningNeighbour)
-			PlanningBranchZ = BranchDataDictPlanning[planningBus].Z[planningNeighbourInd]
-			potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,currentBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
-			skip = getProperMapping(potentialMaps, planningNeighbour,1,currentBus,planningBus)
-			if skip == True:
-				continue
+			for Bus in currentBusGroup: # search for matches for this planning branch with every branch in the CAPE bus group
+				currentDepth = 1 # initial depth
+				potentialMaps = []
+				MultDepthBranchDataDict =  getNeighboursDepthN(Bus,CAPERaw,maxDepth)
+				planningNeighbourInd = PlanningBranchList.index(planningNeighbour)
+				PlanningBranchZ = BranchDataDictPlanning[planningBus].Z[planningNeighbourInd]
+				potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,Bus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
+				skip = getProperMapping(potentialMaps, planningNeighbour,1,Bus,planningBus)
+				if skip == True: # found proper map, break out of this loop and go to investigate the next planning branch
+					break
 
-			# no match found in depth 1, continue to depth 2
-			currentDepth +=1
-			potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,currentBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
-			skip = getProperMapping(potentialMaps, planningNeighbour,2,currentBus,planningBus)
-			if skip == True:
-				continue
+				# no match found in depth 1, continue to depth 2
+				currentDepth +=1
+				potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,Bus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
+				skip = getProperMapping(potentialMaps, planningNeighbour,2,Bus,planningBus)
+				if skip == True: # found proper map, break out of this loop and go to investigate the next planning branch
+					break
 
-			# no match found in depth 2, continue to depth 3
-			currentDepth +=1
-			potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,currentBus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
-			skip = getProperMapping(potentialMaps, planningNeighbour,3,currentBus,planningBus)
-			if skip == True:
-				continue
+				# no match found in depth 2, continue to depth 3
+				currentDepth +=1
+				potentialMaps =  scanNeighbourDepth(MultDepthBranchDataDict,Bus,currentDepth,maxDepth,potentialMaps,autoMappedSet,PlanningBranchZ)
+				skip = getProperMapping(potentialMaps, planningNeighbour,3,Bus,planningBus)
+				if skip == True: # found proper map, break out of this loop and go to investigate the next planning branch
+					break
+			####
 
+			if skip == True: # found match, dont need to add this branch to the unmapped planning neigbours
+				continue
 			# no match found, add planningBus and planningNeighbour combo
 			combo = planningBus + ',' + planningNeighbour
 			planningUnmappedList.append(combo)	
