@@ -23,7 +23,7 @@ from getBranchGroupFnPlanning import makeBranchGroups as makeBranchGroupsPlannin
 # External files being used
 CAPERaw = 'Raw0509.raw'
 planningRaw = 'hls18v1dyn_new.raw'
-ManualMapFile = 'test_branch_comparison.txt'
+ManualMapFile = 'test_branch_comparison2.txt'
 
 
 
@@ -116,7 +116,8 @@ def getProperMapping(potentialMaps, planningNeighbour,searchDepth,originBus,plan
 			planningSubStation = BusNum2SubNameDict[planningNeighbour]
 			for CAPEneighbour in potentialMaps:				
 				if CAPEneighbour in SubStationDictNew[planningSubStation]:
-					if CAPEneighbour not in explored and CAPEneighbour in NeighbourSetDepth5:
+					#if CAPEneighbour not in explored and CAPEneighbour in NeighbourSetDepth5:
+					if CAPEneighbour not in explored:
 						frontier.put(CAPEneighbour)
 						autoMapDict[CAPEneighbour] = set()
 						autoMapDict[CAPEneighbour].add(planningNeighbour)
@@ -218,7 +219,8 @@ while not frontier.empty():
 			CAPEBranchTies = list(BranchGroupDict[currentBus]) # get a list of all the ties, including the currentBus itself
 			for tie in CAPEBranchTies:
 				if tie != currentBus:
-					if tie not in explored and tie in NeighbourSetDepth5:
+					#if tie not in explored and tie in NeighbourSetDepth5:
+					if tie not in explored:
 						frontier.put(tie)
 						# add to all the relevant tracking sets
 						currentBusGroup.add(tie)
@@ -295,8 +297,9 @@ for key in autoMapDict.keys():
 	string  = str(autoMapDict[key]) + '->' + key
 	print string
 
-
+"""
 print '\n\n'
+
 # get a list of all the unmapped buses
 print 'List of buses not mapped yet within a depth of 5 of the CAPE bus provided in input file:'
 unmappedCount = 0
@@ -304,11 +307,11 @@ for n in list(NeighbourSetDepth5):
 	if n not in autoMappedSet:
 		print n
 		unmappedCount +=1
-
+"""
 
 print '\n\n'
-print 'Number of neighbours mapped within a depth of 5: ', len(autoMappedSet)
-print 'Number of neigbours not yet mapped: ', unmappedCount
+print 'Number of neighbours mapped: ', len(autoMappedSet)
+#print 'Number of neigbours not yet mapped: ', unmappedCount
 print '\n\n'
 print 'Please note that the map generated here should only be used for bus mapping, not load or tf mapping'
 

@@ -7,7 +7,7 @@ import os
 for root, dirs, files in os.walk(".", topdown=True):
 
    for name in files:
-   	if name.endswith('.pyc'):
+   	if name.endswith('.pyc') or 'desktop.ini' in name:
    		#print name
    		os.remove(os.path.join(root, name))
    	"""

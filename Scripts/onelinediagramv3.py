@@ -142,16 +142,18 @@ def printOneLineDiagram(searchBus):
         words = line.split(',')
         Bus1 = words[0].strip()
         Bus2 = words[1].strip()
-        if searchBus == Bus1:
-            depthOne.append(Bus2)
-            line = changeIfOldBus(Bus1,line,0)
-            line = changeIfOldBus(Bus2,line,1)
-            print line
-        elif searchBus == Bus2:
-            depthOne.append(Bus1)
-            line = changeIfOldBus(Bus1,line,0)
-            line = changeIfOldBus(Bus2,line,1)
-            print line
+        status = words[13].strip()
+        if status == '1':
+            if searchBus == Bus1:
+                depthOne.append(Bus2)
+                line = changeIfOldBus(Bus1,line,0)
+                line = changeIfOldBus(Bus2,line,1)
+                print line
+            elif searchBus == Bus2:
+                depthOne.append(Bus1)
+                line = changeIfOldBus(Bus1,line,0)
+                line = changeIfOldBus(Bus2,line,1)
+                print line
 
 
     # print transformer data

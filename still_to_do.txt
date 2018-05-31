@@ -22,6 +22,12 @@ Logs:
 	
 	
 Solve issue:
+	Look at all the conflicts. See if the conflicts belong to the same bus group
+	#Get a list of bus conflicts: CAPEBus,OldPSSE mapping, New PSSE mapping
+	Once 345 kV mapping is finished:
+		Apply all the new maps and see if the new mismatches are due to bus splits or not
+		Try to figure out a way to sum up all the power flows for bus groups and to see if they are zero
+		
 	Figure out the mappings of the cases in tfMismatchIssues.txt
 	#Work on a function which will generate depth n neighbour data dict:
 	#	It should have info about the to bus in depth n

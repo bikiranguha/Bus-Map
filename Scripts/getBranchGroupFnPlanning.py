@@ -27,7 +27,7 @@ def makeBranchGroups(planningRaw):
 			Z = math.sqrt(R**2 + X**2)
 			status = words[-5].strip()
 
-			if Z <= 1e-4 and status == '1':
+			if Z <= 2e-4 and status == '1':
 
 				Bus1 = words[0].strip()
 				Bus2 = words[1].strip()
