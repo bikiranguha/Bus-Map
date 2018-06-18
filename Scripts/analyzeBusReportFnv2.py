@@ -1,8 +1,6 @@
 
 
-def BusFlowData(flowReport,Raw):
-	# flowReport: Bus flow report
-	# Raw: Raw file you want to read
+def BusFlowData(flowReport,CAPERaw):
 	import math
 	flowDict = {}
 	areaList = []
@@ -22,7 +20,7 @@ def BusFlowData(flowReport,Raw):
 
 
 	# get all the area codes
-	with open(Raw,'r') as f:
+	with open(CAPERaw,'r') as f:
 		filecontent = f.read()
 		fileLines = filecontent.split('\n')
 		areaStartIndex = fileLines.index("0 / END OF TRANSFORMER DATA, BEGIN AREA DATA") + 1
@@ -38,7 +36,6 @@ def BusFlowData(flowReport,Raw):
 		filecontent = f.read()
 		fileLines = filecontent.split('\n')
 
-	#print areaList
 	#helperLine = '  BUS# X-- NAME --X BASKV ZONE  PU/KV  ANGLE  MW/MVAR MW/MVAR MW/MVAR   BUS# X-- NAME --X BASKV AREA CKT   MW    MVAR   RATIO   ANGLE   AMPS   %  SET A'
 	matchingPattern = '---------------------------------------------------------------------------------'
 	indices = [i for i, x in enumerate(fileLines) if matchingPattern in x] # indices of the all the relevant starting lines
@@ -90,23 +87,15 @@ def BusFlowData(flowReport,Raw):
 		ind +=1
 		nextLineWords = fileLines[ind].split()
 		nextLineWords = [word for word in nextLineWords if word != ''] # exclude all elements which are blanks
-
+		areaFound = 0
+		for area in areaList:
+			if area in nextLineWords:
+				areaFound = 1
+				currentArea = area
+				break
 		# remaining lines
-		while nextLineWords[2] in areaList or nextLineWords[3] in areaList or nextLineWords[4] in areaList or nextLineWords[5] in areaList: # continue till we can find the area info in line
-			# get current area
-			if nextLineWords[2] in areaList:
-				currentArea = nextLineWords[2]
-			elif nextLineWords[3] in areaList:
-				currentArea = nextLineWords[3]
-			elif nextLineWords[4] in areaList:
-				currentArea = nextLineWords[4]
-			elif nextLineWords[5] in areaList:
-				currentArea = nextLineWords[5]
+		while areaFound == 1:
 			line = fileLines[ind]
-			#if currentArea != '222':
-			#	print line
-
-
 			words = line.split()
 			words = [word for word in words if word != '']
 			toBus = words[0].strip()
@@ -141,7 +130,14 @@ def BusFlowData(flowReport,Raw):
 				line  = fileLines[ind]
 				nextLineWords = line.split()
 				nextLineWords = [word for word in nextLineWords if word != ''] # exclude all elements which are blanks
-
+			
+			for area in areaList:
+				if area in nextLineWords:
+					areaFound = 1
+					currentArea = area
+					break
+				else:
+					areaFound = 0
 
 
 				# get the mismatch info
@@ -172,9 +168,7 @@ def BusFlowData(flowReport,Raw):
 
 	return flowDict
 
-
-# testing
 if __name__ == "__main__":
-	flowReport = 'BusReports_RAW0602_final.txt'
+	flowReport = 'BusReports_RAW0509.txt'
 	CAPERaw = 'RAW0509.raw' 
 	flowDict = BusFlowData(flowReport,CAPERaw)

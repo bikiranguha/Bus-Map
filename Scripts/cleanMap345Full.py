@@ -1,6 +1,8 @@
 newLines = []
-Map345PartiallyCleaned = 'Map345PartiallyCleaned.txt'
-Map345FullCleaned = 'Map345FullCleaned.txt'
+Map345PartiallyCleaned = 'mapping_test_0602.txt'
+Map345FullCleaned = 'mapping_test_0602_flip.txt'
+
+
 with open(Map345PartiallyCleaned,'r') as f:
 	filecontent = f.read()
 	fileLines = filecontent.split('\n')

@@ -2,7 +2,6 @@
 Function to get all Bus Data with Raw file name as input
 """
 
-
 def getBusData(Raw):
 
 	BusDataDict = {}

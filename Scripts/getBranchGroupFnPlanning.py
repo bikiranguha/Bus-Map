@@ -83,7 +83,7 @@ def makeBranchGroups(planningRaw):
 if __name__ == "__main__":
 	planningRaw = 'hls18v1dyn_1219.raw'
 	BranchGroupDict = makeBranchGroups(planningRaw)
-	
+	"""
 	while True:
 		searchTerm = raw_input('Enter bus number whose list of ties you are looking for: ')
 		if searchTerm in BranchGroupDict.keys():
@@ -91,6 +91,7 @@ if __name__ == "__main__":
 				print Bus
 		else:
 			print 'Bus has no ties'
+	"""
 	"""
 	with open('tmp.txt','w') as f:
 		for line in highImpedanceTieList:

@@ -96,7 +96,16 @@ def doTFMaps(changeLines,OldRAW,newRAW,planningBusDataDict,CAPEBusDataDict,Manua
 		# 3rd line, import phase shift info
 		line3 = oldTFList[2]
 		words = line3.split(',')
-		PS = TFPSDict[CAPEKey] # float
+		try:
+			PS = TFPSDict[CAPEKey] # float
+		except:
+			CAPEKeyWords = CAPEKey.split(',')
+			Bus1 = CAPEKeyWords[0].strip()
+			Bus2 = CAPEKeyWords[1].strip()
+			cktID = CAPEKeyWords[2].strip()
+			switchCAPEKeyBuses = Bus2 + ',' + Bus1 + ',' + cktID
+			PS = TFPSDict[switchCAPEKeyBuses]
+			CAPEKey = switchCAPEKeyBuses
 
 		if PS == 0.0:
 			PSstr = '%0.5f' %PS # convert to string
@@ -238,13 +247,21 @@ def doTFMaps(changeLines,OldRAW,newRAW,planningBusDataDict,CAPEBusDataDict,Manua
 		Bus3 = words[2].strip()
 		cktID = words[3].strip("'").strip()
 		key = Bus1+','+Bus2+','+cktID
+		keyBusOrderSwitched = Bus2 + ',' + Bus1 + ',' + cktID
 
 		if key in NewTFData.keys():
 			newTFList = NewTFData[key] # list containing tf data
 			for ele in newTFList:
 				newRawLines.append(ele)
 			i+=4 # continue to next tf
-		
+
+		elif keyBusOrderSwitched in NewTFData.keys(): # switch bus order and try to map
+			newTFList = NewTFData[keyBusOrderSwitched] # list containing tf data
+			for ele in newTFList:
+				newRawLines.append(ele)
+			i+=4 # continue to next tf
+
+	
 		else: # tf need not be changed, add lines
 			line = fileLines[i]
 			newRawLines.append(line)
