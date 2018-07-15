@@ -9,14 +9,14 @@
 changeLog = 'changeBusNoLog.txt'
 CAPERaw = 'CAPE_RAW0228v33.raw'
 outsideComedFile = 'outsideComedBusesv4.txt'
-newbranchData =  'newbranchData.txt' # output of this file
-
+newbranchData =  'branchData.txt' # output of this file
+isolatedCAPEBusList = 'isolatedCAPEBusList_All.txt' # list of buses which are isolated in cape
 OldBusSet = set()
 NewBusSet = set()
-#MapDict = {}
+#changeDict = {}
 #GenDict = {}
-MapDict = {} # key: Old bus number, value: new bus number
-noNeedtoMapSet = set()
+changeDict = {} # key: Old bus number, value: new bus number
+noNeedtoMapSet = set() # contains CAPE buses which are non-comed and isolated buses
 
 # look at log files which contains all the changed bus number
 
@@ -33,7 +33,7 @@ with open(changeLog,'r') as f:
 		NewBus = words[1].strip()
 		OldBusSet.add(OldBus)
 		NewBusSet.add(NewBus)
-		MapDict[OldBus] = NewBus
+		changeDict[OldBus] = NewBus
 
 
 # get a set of buses which dont need to be included in the branch data
@@ -47,12 +47,19 @@ with open(outsideComedFile,'r') as f:
 			noNeedtoMapSet.add(line.strip())
 			#CAPEMappedSet.add(line.strip())
 
+# get the set of isolated buses and add them to no need to Map Set
+with open(isolatedCAPEBusList,'r') as f:
+	filecontent = f.read()
+	fileLines = filecontent.split('\n')
+	for line in fileLines:
+		if 'isolated' in line:
+			continue
+		noNeedtoMapSet.add(line.strip())	
 
-
-def changeBus(Bus,words,MapDict):
+def changeBus(Bus,words,changeDict):
 	#print Bus
 	newLine = ''
-	newBus = MapDict[Bus]
+	newBus = changeDict[Bus]
 	lennewBus = len(newBus)
 	newBus = ' '*(6 - lennewBus) + newBus
 	for word in words:
@@ -94,13 +101,13 @@ with open(CAPERaw, 'r') as f:
 
 		if Bus1 in OldBusSet:
 			#print line
-			line = changeBus(Bus1,words,MapDict)
+			line = changeBus(Bus1,words,changeDict)
 			words = line.split(',')
 			#print line
 			#branchLines.append(line)
 		if Bus2 in OldBusSet:
 			#print line
-			line = changeBus(Bus2,words,MapDict)
+			line = changeBus(Bus2,words,changeDict)
 			#print line
 			#branchLines.append(line)
 		
@@ -116,5 +123,10 @@ with open(newbranchData, 'w') as f:
 
 
 
-
-
+# apply the branch impedance changes
+from BranchMapper import MapChange
+planningRaw = 'hls18v1dyn_1219.raw'
+BranchInput = 'branchData.txt'
+BranchOutput  = 'newbranchData.txt'
+changeFile = 'BranchImpedanceChanges.txt'
+MapChange(planningRaw,changeFile,BranchInput,BranchOutput,'planning')

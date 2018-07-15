@@ -4,7 +4,7 @@ Generate a dict which will contain tf data for Comed LV buses in the planning fi
 
 
 planningRaw = 'hls18v1dyn_1219.raw'
-listMultTFfile = 'listMultTFfileCAPE.txt'
+
 
 ComedBusSet = set() # all buses in comed
 TFDataDict = {} # key: Bus1, Bus2, cktID (without apostrophy), value: tf data

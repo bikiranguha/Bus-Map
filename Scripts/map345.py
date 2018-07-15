@@ -3,24 +3,11 @@
 """
 
 from mapAndcopyGen import MapDict,PSSEBusSet, CAPEBusSet
-
+from getBranchGroupFn import makeBranchGroups
 PSSEMap = 'PSSE345Mapverified.txt' # verified 345 kV bus map data
 CAPEBranchGroupFile = 'branchGroupv3.txt' # groups of buses which are basically sub-sections of the same bus
-
-
-groupList = [] # list of the bus group data
-
-
-# get the bus group data
-with open(CAPEBranchGroupFile,'r') as f:
-	filecontent = f.read()
-	fileLines = filecontent.split('\n')
-	for line in fileLines:
-		words = line.split(',')
-		lst = []
-		for word in words:
-			lst.append(word.strip())
-		groupList.append(lst)
+CAPERaw = 'MASTER_CAPE_Fixed.raw'
+BranchGroupDict = makeBranchGroups(CAPERaw)
 
 
 # open the 345 map and generate a dictionary of PSSE->CAPE maps, also generate sets of PSSE and CAPE buses to be mapped
@@ -39,11 +26,12 @@ with open(PSSEMap,'r') as f:
 				PSSEBusSet.add(PSSEBus)
 			MapDict[CAPEBus] = PSSEBus 
 			CAPEBusSet.add(CAPEBus) # log that the CAPE Bus has been mapped
-			for lst in groupList: # add all the buses grouped to it
-				if CAPEBus in lst:
-					for Bus in lst:
-						if Bus!= CAPEBus: # generate key-value pairs for the remaining buses in the group
-							MapDict[Bus] = PSSEBus
-							CAPEBusSet.add(Bus) 
-					break
+
+			if CAPEBus in BranchGroupDict.keys(): # CAPE Bus has ties
+				# Map all ties to the same bus
+				BusGroupSet = BranchGroupDict[CAPEBus]
+				for Bus in list(BusGroupSet):
+					MapDict[Bus] = PSSEBus
+					CAPEBusSet.add(CAPEBus)
+
 #print len(CAPEBusSet)

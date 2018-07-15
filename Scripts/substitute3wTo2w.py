@@ -1,12 +1,11 @@
 """
  Script to substitute three winder -> two winder cases in FinalSolFile
 """
-import math
 
 FinalSolFile = 'Final_sol_3w.txt' # TF substitutions which are special
 PSSErawFile = 'hls18v1dyn_new.raw'
-twoWinderCAPERawFile = '2wnd_RAW03222018.raw'
-tmapFile = 'tmap_RAW03222018.raw'
+twoWinderCAPERawFile = '2wnd_NewCAPERawClean0319.raw'
+tmapFile = 'tmap_NewCAPERawClean0319.raw'
 newTFFIle = '2wnd_tf_iter2.txt'
 
 ThreeToTwoSubDict = {}  # value: CAPE three winder id, values: ImpedanceInfo() class
@@ -164,26 +163,10 @@ while i < tfEndIndex:
 			R12 = float(words[0].strip())
 			X12 = float(words[1].strip())
 			SBASE12 = float(words[2].strip())
-			if CZ == '2':
-				R12 = R12*100.0/SBASE12
-				X12 = X12*100.0/SBASE12
-
-			elif CZ == '3':
-				#print line
-				#print 'R12 old: ', R12
-				R12 = (R12/10**6)*(100.0/SBASE12**2)
-				#print 'R12 new: ', R12
-				#print 'X12 old: ', X12
-				Z12 = X12*100/SBASE12
-				X12 = math.sqrt(Z12**2 - R12**2)
-				print 'X12 new: ', X12
-
-			"""
 			#change values if values are not based on system MVA
 			if CZ != '1':
 				R12 = R12*100.0/SBASE12
 				X12 = X12*100.0/SBASE12
-			"""
 
 			CAPEKey = findCAPEkeyPlanning[key]
 			#print CAPEKey

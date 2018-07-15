@@ -1,4 +1,4 @@
-# Get input CAPE from bus and to bus, get corresponding maps and generate artificial load at to bus
+# Get input CAPE from bus and to bus, get corresponding maps and generate artificial load at from bus
 
 
 def artificialLoad(fromBus, planningFromBus, planningToBus,  planningFlowReport):

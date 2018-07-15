@@ -6,7 +6,8 @@ import shutil
 
 mapFile = 'autoTFMap0505.txt'
 CAPERaw = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Island 34 system' + '/' + 'Raw0414tmp_loadsplit.raw'
-newRaw = 'RAW0501.raw'
+#newRaw = 'RAW0501.raw'
+newRaw = 'RAW0501_v2.raw'
 #mapFile = 'testMaptmp.txt'
 from checkLoadSplit import BusVoltDict as planningBusVoltDict
 from loadSplitCAPE import BusVoltDict as CAPEBusVoltDict, BusZoneDict as CAPEBusZoneDict

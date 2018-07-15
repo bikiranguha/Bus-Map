@@ -3,9 +3,9 @@ Keeps track of the manual and auto bus mappings using MapDictNew and MapDictOld
 First priority is mapping_prirority1 and then AllMappedLog.txt
 """
 
-changeLog = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/' + 'changeBusNoLog.txt'
-mapping_priority1 = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/' + 'mapping_priority1.txt'
-AllMapFile = 'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/' + 'AllMappedLog.txt'
+changeLog = 'changeBusNoLog.txt'
+mapping_priority1 =  'mapping_priority1.txt'
+AllMapFile ='AllMappedLog.txt'
 MapDictNew = {} # keys are new CAPE bus numbers (gen and conflicts are changed)
 MapDictOld = {} # keys are old (or original) CAPE bus numbers
 changeDictNewToOld = {} # keeps track of new to old changes

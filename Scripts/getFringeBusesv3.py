@@ -1,6 +1,8 @@
+# get the path from all Comed generators to the nearest 345
 # get the path from the three 138 kV substations where the SVCs are at, to nearest 345
 # get all the buses connected to 345 directly (or through midpoints)
 # get all the COMED boundary buses
+
 import sys
 sys.path.insert(0,'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2')
 sys.path.insert(0,'C:/Users/Bikiran/Google Drive/Bus Mapping Project Original/Donut Hole Approach/Donut Hole v2/Raw with only 2 winders/Automate 345 kV mapping')
@@ -38,9 +40,12 @@ BoundaryBusSet = set()
 CAPEBranchGroupDict = makeBranchGroups(CAPERaw)
 ArtificialLoadLines = []
 
+# add special bus '5362' to ImpBusPathSet
+ImpBusPathSet.add('5362') # This bus does not appear in the path because alternate path through '5361' is chosen by the script for gen 274686
 
 
 def populatePathDict(FromBus,toBus):
+	# build the path dict
 	# info needed for getting artificial load bus flows
 	if toBus not in ParentDict.keys():
 		ParentDict[toBus] = FromBus
@@ -141,7 +146,7 @@ for Bus in CAPEBusDataDict.keys():
 			# deal with midpoints, get its neighbours which are not the bus itself
 			NeighbourName = CAPEBusDataDict[tfNeighbour].name
 			if NeighbourName.startswith('T3W') or NeighbourName.endswith('M'):
-				print tfNeighbour
+				#print tfNeighbour
 				necessaryMidpointSet.add(tfNeighbour)
 				Depth2Neighbours = TFDataDict[tfNeighbour].toBus
 				for d2Neighbour in Depth2Neighbours:
@@ -170,7 +175,10 @@ writeToFile(directTFConnFile,directTFConnLines,'List of buses which are directly
 
 for Bus in CAPEBusDataDict.keys():
 	if CAPEBusDataDict[Bus].area == '222' and float(CAPEBusDataDict[Bus].NominalVolt) < 345.0:
-		neighboursList = list(CAPENeighboursDict[Bus])
+		try:
+			neighboursList = list(CAPENeighboursDict[Bus])
+		except: # bus has no branch
+			continue
 		for neighbour in neighboursList:
 			if CAPEBusDataDict[neighbour].area != '222' :
 				populatePathDict(neighbour,Bus)
@@ -198,7 +206,7 @@ for Bus in list(ImpBusPathSet):
 	if Bus not in CAPEBranchGroupDict.keys(): # Bus has no ties
 		neighbourList = list(CAPENeighboursDict[Bus])
 		for neighbour in neighbourList:
-			if neighbour not in ImpBusPathSet and neighbour not in directTFConnSet and neighbour not in BoundaryBusSet:
+			if neighbour not in ImpBusPathSet and neighbour not in directTFConnSet and neighbour not in BoundaryBusSet and CAPEBusDataDict[neighbour].area == '222':
 				if float(CAPEBusDataDict[neighbour].NominalVolt) < 345.0:
 					ImpBusPathDepth1Set.add(neighbour)
 					populatePathDict(Bus,neighbour)
@@ -212,7 +220,7 @@ for Bus in list(ImpBusPathSet):
 			ImpBusPathSet.add(tie)
 			tieNeighbourList = list(CAPENeighboursDict[tie])
 			for tieNeighbour in tieNeighbourList:
-				if tieNeighbour not in BusGroup and tieNeighbour not in ImpBusPathSet and tieNeighbour not in necessaryMidpointSet:
+				if tieNeighbour not in BusGroup and tieNeighbour not in ImpBusPathSet and tieNeighbour not in necessaryMidpointSet and CAPEBusDataDict[tieNeighbour].area == '222':
 					if float(CAPEBusDataDict[tieNeighbour].NominalVolt) < 345.0:
 						ImpBusPathDepth1Set.add(tieNeighbour)
 						populatePathDict(tie,tieNeighbour)
@@ -255,12 +263,21 @@ for Bus in BoundaryBusSet:
 		ArtificialLoadBusSet.add(Bus)
 """
 
+
+# make sure none of the buses in ArtificialLoadBusSet are important buses, if yes, then remove these buses
+ArtificialLoadBusSetCleaned = set()
 for Bus in list(ArtificialLoadBusSet):
+	if Bus not in ImpBusPathSet:
+		ArtificialLoadBusSetCleaned.add(Bus)
+
+
+
+for Bus in list(ArtificialLoadBusSetCleaned):
 	BusName = CAPEBusDataDict[Bus].name
 	BusVolt = CAPEBusDataDict[Bus].NominalVolt
 	string = Bus + ',' + BusName + ',' + BusVolt + ',' + ParentDict[Bus]
-	if float(BusVolt) > 138.0:
-		print string
+	#if float(BusVolt) > 138.0:
+		#print string
 	ArtificialLoadLines.append(string)	
 writeToFile(ArtificialLoadBusFile,ArtificialLoadLines,'List of buses which will be converted to artificial loads. Format: Bus, Name, Volt, List of neighbours which will be present')
 

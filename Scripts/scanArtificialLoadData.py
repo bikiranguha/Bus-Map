@@ -31,7 +31,7 @@ with open(ArtificialLoadBusFile,'r') as f:
 
 
 
-with open('ALBusList.txt','w') as f:
+with open(ALBusList,'w') as f:
 	f.write('FromBus,Name,Volt=toBus(Artificial Load),Name,Volt')
 	f.write('\n')
 	for key in ALDict.keys():

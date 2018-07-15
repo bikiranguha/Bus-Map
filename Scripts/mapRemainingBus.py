@@ -1,22 +1,26 @@
 """
-
+Map all the remaining buses
 """
 
 
-from map345 import MapDict,PSSEBusSet, CAPEBusSet, groupList
-from generateNeighbours import NeighbourDict # Dictionary of neighbours for each bus in CAPE
+from map345 import MapDict,PSSEBusSet, CAPEBusSet
+from getBranchGroupFn import makeBranchGroups
+from generateNeighboursFn import getNeighbours 
+#from generateNeighbours import getBranchNeighbours # Dictionary of neighbours for each bus in CAPE
+#from getBusDataFn import getBusData
 
-mapFile = 'mapped_buses_cleaned.csv' # manual map file
-PSSEBusData = 'PSSE_bus_data.txt' 
+mapFile = 'mapped_buses_cleaned0407.csv' # manual map file
+planningBusData = 'PSSE_bus_data.txt' 
 #mapFile = 'mapped_buses_cleaned.csv'
 outsideComedFile = 'outsideComedBusesv4.txt' # list of buses which are outside comed in the CAPE case
 GenBusChangeLog = 'GenBusChange.log' # file which helps decide which buses should be gen buses in the new raw file
 changeBusNoLog = 'changeBusNoLog.txt' # file containing bus renumbering
 isolatedCAPEBusList = 'isolatedCAPEBusList.txt' # list of buses which are isolated in cape
-CAPERaw = 'CAPE_RAW0228v33.raw'
+CAPERaw = 'MASTER_CAPE_Fixed.raw'
 AllMappedBusData = 'AllMappedBusData.txt' # output file which contains all the CAPE bus data, with voltages mapped from planning
 AllMappedLog = 'AllMappedLog.txt' # the log of which bus maps to what
-
+BranchGroupDict = makeBranchGroups(CAPERaw)
+NeighbourDict = getNeighbours(CAPERaw)
 
 AllCAPEBuses = set()
 AllPSSEBuses = set()
@@ -79,18 +83,19 @@ with open(mapFile,'r') as f:
 			#print CAPEBus
 			continue
 
+
 		if PSSEBus not in PSSEBusSet: 
 			PSSEBusSet.add(PSSEBus)
 		MapDict[CAPEBus] = PSSEBus 
 		CAPEBusSet.add(CAPEBus) # log that the CAPE Bus has been mapped
-		for lst in groupList:
-			if CAPEBus in lst:
-				for Bus in lst:
-					if Bus!= CAPEBus: # generate key-value pairs for the remaining buses in the group
-						if Bus not in noNeedtoMapSet:
-							MapDict[Bus] = PSSEBus
-							CAPEBusSet.add(Bus) 
-				break
+		if CAPEBus in BranchGroupDict.keys(): # CAPE Bus has ties
+			# Map all ties to the same bus
+			BusGroupSet = BranchGroupDict[CAPEBus]
+			for Bus in list(BusGroupSet):
+				if Bus not in noNeedtoMapSet:
+					MapDict[Bus] = PSSEBus
+					CAPEBusSet.add(Bus)
+
 
 #print len(CAPEBusSet)
 
@@ -114,7 +119,7 @@ while iteration <10:
 	for Bus in AllCAPEBuses:
 		if Bus not in noNeedtoMapSet:
 			if Bus in CAPEBusSet:
-				neighboursList = NeighbourDict[Bus]
+				neighboursList = list(NeighbourDict[Bus])
 				for neighbour in neighboursList:
 					if neighbour in unmappedCAPEset:
 						MapDict[neighbour] = MapDict[Bus]
@@ -146,7 +151,7 @@ while iteration <10:
 
 
 # open up PSSE bus data and make a dictionary of Vmag and Vang
-with open(PSSEBusData,'r') as f:
+with open(planningBusData,'r') as f:
 	filecontent = f.read()
 	fileLines = filecontent.split('\n')
 	for line in fileLines:
@@ -196,20 +201,23 @@ with open(CAPERaw,'r') as f:
 		Bus = words[0].strip()
 
 		# Check if there is any Bus number conflict
-		if Bus not in noNeedtoMapSet:
-			if Bus not in TrueGenBusSet: # Bus number already changed to PSSE Gen Bus Number
-				if Bus in AllPSSEBuses:
+		if Bus not in noNeedtoMapSet: # comed bus
+			if Bus not in TrueGenBusSet: # Bus number is not a gen (which are already changed to PSSE Gen Bus Number)
+				if Bus in AllPSSEBuses: # Bus number has conflict with PSSE bus number set
+
 					newNoFound = 0
-					if newBus not in AllPSSEBuses:
-						if newBus not in AllCAPEBuses:
-							changeBusNumber[Bus] = str(newBus)
-							words[0] = str(newBus)
-							newBus +=1
-							newNoFound = 1
+					# loop till you find a non-conflicting bus number
+					while newNoFound == 0:
+						if newBus not in AllPSSEBuses: # newBus does not exist in AllPSSEBuses
+							if newBus not in AllCAPEBuses: # newBus does not exist in AllCAPEBuses
+								changeBusNumber[Bus] = str(newBus)
+								words[0] = str(newBus)
+								newBus +=1
+								newNoFound = 1 # newBus has no conflicts
+							else: # newBus still conflicts with AllCAPEBuses set
+								newBus +=1
 						else:
 							newBus +=1
-					else:
-						newBus +=1
 		noNeedtoMapSet.add('998884') # temporary addition, does not seem to be connected to anything in comed
 
 

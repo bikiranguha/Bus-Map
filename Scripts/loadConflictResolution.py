@@ -32,7 +32,7 @@ with open(newLoadData,'r') as f:
 			else:
 				cktIDDict[Bus] = 1
 
-		else:
+		else: # ckt id conflict, increment and implement ckt id
 			oldLines.append(line)
 			#cktID = int(words[1].strip("'"))
 			newcktID = cktIDDict[Bus]+1

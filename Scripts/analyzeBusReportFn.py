@@ -1,4 +1,6 @@
-
+"""
+Organizes all the important data in bus flow reports into a dictionary with the from Bus as key and the value is a class structure holding all mismatch info
+"""
 
 def BusFlowData(flowReport,Raw):
 	# flowReport: Bus flow report

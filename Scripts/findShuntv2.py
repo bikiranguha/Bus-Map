@@ -4,9 +4,12 @@ Generate the new switched shunt data, including any bus renumbering
 
 
 #newdir = 'Important Data'
-from mapRemainingBus import noNeedtoMapSet, TrueGenBusSet
-from generateNeighboursPlanning import NeighbourDict
+
+#from mapRemainingBus import  TrueGenBusSet
+#from generateNeighboursPlanning import NeighbourDict
+from generateNeighboursFn import getNeighbours
 #from changetfDatav4 import BusVoltageDict
+from getBusDataFn import getBusData
 
 PSSErawFile = 'hls18v1dyn_1219.raw'
 AllMapFile = 'AllMappedLog.txt'
@@ -15,8 +18,12 @@ newShuntData =  'newShuntData.txt' # output of this file
 ssBusNoChangeLog =  'ssBusNoChangeLog.txt' # log of changes made in this file
 changeLog = 'changeBusNoLog.txt'
 BusData = 'PSSE_bus_data.txt'
+outsideComedFile = 'outsideComedBusesv4.txt'
+isolatedCAPEBusList = 'isolatedCAPEBusList_All.txt' # list of buses which are isolated in cape
+GenBusChangeLog = 'GenBusChange.log' # log file of CAPE buses which have been renumbered to PSSE gen bus numbers
+NeighbourDict = getNeighbours(PSSErawFile) # dict of neighbours in planning
 #PSSEGenFile = 'PSSEGenFile.txt'
-
+BusDataDict = getBusData(PSSErawFile)
 genLines = []
 ComedBusSet = set()
 MapDict = {}
@@ -25,10 +32,10 @@ ssBusNoChangeDict ={}
 changeBusNoLogList = []
 OldBusSet  =set()
 changeNameDict = {}
-BusVoltageDict = {}
-
-
-
+#BusVoltageDict = {}
+noNeedtoMapSet = set()
+TrueGenBusSet = set() # set of all gen buses, numbered according to planning
+"""
 with open(BusData,'r') as f:
     filecontent = f.read()
     fileLines = filecontent.split('\n')
@@ -39,6 +46,44 @@ with open(BusData,'r') as f:
         Bus = words[0].strip()
         Volt = words[2].strip()
         BusVoltageDict[Bus] = Volt
+"""
+# get the set of true gen buses (numbered according to planning)
+with open(GenBusChangeLog,'r') as f:
+    filecontent = f.read()
+    fileLines = filecontent.split('\n')
+    for line in fileLines:
+        if 'CAPE' in line:
+            continue
+        if '->' not in line:
+            continue
+        words = line.split('->')
+        TrueGenBusSet.add(words[0].strip())
+
+
+
+
+# get a set of buses which dont need to be included in the branch data
+with open(outsideComedFile,'r') as f:
+    filecontent = f.read()
+    fileLines = filecontent.split('\n')
+    for line in fileLines:
+        if 'Manually' in line:
+            continue
+        if line.strip() != '':
+            noNeedtoMapSet.add(line.strip())
+            #CAPEMappedSet.add(line.strip())
+
+# get the set of isolated buses and add them to no need to Map Set
+with open(isolatedCAPEBusList,'r') as f:
+    filecontent = f.read()
+    fileLines = filecontent.split('\n')
+    for line in fileLines:
+        if 'isolated' in line:
+            continue
+        noNeedtoMapSet.add(line.strip())
+
+#########
+
 
 
 def changeRegulatingBus(line):
@@ -61,11 +106,11 @@ def changeRegulatingBus(line):
 
         # See if any neighbours of same voltage is mapped
         # If mapped, then make that the regulating bus
-        neighbourList = NeighbourDict[regulateBus]
-        regulateBusVolt = BusVoltageDict[regulateBus]
+        neighbourList = list(NeighbourDict[regulateBus])
+        regulateBusVolt = BusDataDict[regulateBus].NominalVolt
         found = 0
         for neighbour in neighbourList:
-            if BusVoltageDict[neighbour] == regulateBusVolt:
+            if BusDataDict[neighbour].NominalVolt == regulateBusVolt:
                 if neighbour in MapDict.keys():
                     newBus = MapDict[neighbour]
                     found = 1

@@ -5,7 +5,7 @@
 	# add all non-comed data using the cropped data, find out how the boundary branches were being incorporated
 
 # run other scripts before doing this
-import getFringeBusesv3
+#import getFringeBusesv3 # generate the AllToBeMappedData, ArtificialLoadBusData sets to be used in this file 
 #import scanArtificialLoadData
 
 
@@ -17,7 +17,8 @@ from getBusDataFn import getBusData # create a dictionary which organizes all bu
 from analyzeBusReportFn import BusFlowData # generates bus flow report dictionary with from Bus as key
 from ArtificialLoadFnv3 import artificialLoad # generatesa all the artificial load data
 
-CAPERaw = 'RAW0606.raw' # most updated merged raw file, with all verified mappings applied
+CAPERaw = 'RAW0620.raw' # most updated merged raw file, with all verified mappings applied
+ArtificialLoadMappingFile = 'ArtificialLoadMapping_0620.txt' # input mapping file for artificial loads
 newRawFile = 'RAWCropped.raw' # new cropped raw file
 AllToBeMappedSet =set() # set of  comed buses which will be there in the cropped raw file
 ArtificialLoadBusSet = set() #  set of to buses to artificial load buses in comed (eliminated, but flow is required to be put as load to from bus)
@@ -32,7 +33,6 @@ newFSData = 'newFSData.txt' # fixed shunt data
 newSSData = 'newSSData.txt' # switched shunt data
 planningFlowReport = 'BusReports_Planning.txt' 
 planningRaw = 'hls18v1dyn_1219.raw'
-ArtificialLoadMappingFile = 'ArtificialLoadMapping_temp.txt' # input mapping file for artificial loads
 CAPEBusDataDict = getBusData(CAPERaw)
 loadCktIDDict = {} # key: CAPE bus, value: number of loads connected to this bus, like a numeric ckt id
 DoNotIncludeBusSet = ['7', '9', '400001'] # special buses which should not be included in this cropped raw file
@@ -133,7 +133,7 @@ with open(CAPERaw,'r') as f:
 			newBusLines.append(line)
 
 		# get all the 345 or higher buses
-		elif CAPEBusDataDict[Bus].area == '222' and float(CAPEBusDataDict[Bus].NominalVolt) >= 345.0:
+		elif CAPEBusDataDict[Bus].area == '222' and float(CAPEBusDataDict[Bus].NominalVolt) >= 345.0 and Bus not in ArtificialLoadBusSet:
 			newBusLines.append(line)
 			AllToBeMappedSet.add(Bus)
 
@@ -270,12 +270,13 @@ for line in artificialLoadLines:
 	try:
 		if loadCktIDDict[Bus] > 0: # artificial load bus already had loads before
 			newcktID = loadCktIDDict[Bus] + 1
+			loadCktIDDict[Bus] = newcktID
 			newcktIDStr = "'" + str(newcktID) + " '"
 			words[1] = newcktIDStr
 			line = reconstructLine2(words)
 			#print line
 	except: # Bus has no load
-		pass
+		loadCktIDDict[Bus] = 1
 	newLoadLines.append(line)
 
 writeToFile(newLoadData,newLoadLines,'') # writes all the lines in newBusLines to newBusData

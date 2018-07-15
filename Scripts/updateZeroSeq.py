@@ -1,3 +1,7 @@
+"""
+Does the re-numbering of the CAPE comed buses in the zero seq file. Includes buses which were changed coz of generator or becoz of merging conflicts
+"""
+
 changeLog = 'changeBusNoLog.txt'
 changeOldToNewDict = {}
 oldZeroSeq = 'CAPERaw.seq'
@@ -136,20 +140,34 @@ mutualZEndIndex = fileLines.index("0/ End of Zero Sequence Mutual Impedance Data
 for i in range(mutualZStartIndex, mutualZEndIndex):
 	line = fileLines[i]
 	words = line.split(',')
-	Bus1 = words[0].strip()
-	Bus2 = words[1].strip()
-	if Bus1 in changeOldToNewDict.keys():
-		newBus1 = changeOldToNewDict[Bus1]
-		words[0] = ' '*(6-len(newBus1)) + newBus1
+	# From end buses
+	Bus1F = words[0].strip()
+	Bus2F = words[1].strip()
 
-	if Bus2 in changeOldToNewDict.keys():
-		newBus2 = changeOldToNewDict[Bus2]
-		words[1] = ' '*(6-len(newBus2)) + newBus2
+	if Bus1F in changeOldToNewDict.keys():
+		newBus1F = changeOldToNewDict[Bus1F]
+		words[0] = ' '*(6-len(newBus1F)) + newBus1F
+
+	if Bus2F in changeOldToNewDict.keys():
+		newBus2F = changeOldToNewDict[Bus2F]
+		words[1] = ' '*(6-len(newBus2F)) + newBus2F
+
+
+	# From end buses
+	Bus1T = words[3].strip()
+	Bus2T = words[4].strip()
+
+	if Bus1T in changeOldToNewDict.keys():
+		newBus1T = changeOldToNewDict[Bus1T]
+		words[3] = ' '*(6-len(newBus1T)) + newBus1T
+
+	if Bus2T in changeOldToNewDict.keys():
+		newBus2T = changeOldToNewDict[Bus2T]
+		words[4] = ' '*(6-len(newBus2T)) + newBus2T
 
 	line = reconstructLine2(words)
 	newMutualZLines.append(line)
 
-"""
 # zero seq transformer data
 newTFLines = []
 tfStartIndex = fileLines.index("0/ End of Zero Sequence Mutual Impedance Data; Begin Zero Sequence Transformer Data") + 1
@@ -157,20 +175,33 @@ tfEndIndex = fileLines.index("0/ End of Zero-Sequence Transformer data; Begin Ar
 
 for i in range(tfStartIndex, tfEndIndex):
 	line = fileLines[i]
-	words = line.split(',')
-	Bus1 = words[0].strip()
-	Bus2 = words[1].strip()
-	if Bus1 in changeOldToNewDict.keys():
-		newBus1 = changeOldToNewDict[Bus1]
-		words[0] = ' '*(6-len(newBus1)) + newBus1
+	#words = line.split(',')
+	Bus1 = line[:6]
+	Bus2 = line[7:13]
+	Bus3 = line[14:20]
+	RestOfLine = line[20:]
 
-	if Bus2 in changeOldToNewDict.keys():
-		newBus2 = changeOldToNewDict[Bus2]
-		words[1] = ' '*(6-len(newBus2)) + newBus2
 
-	line = reconstructLine2(words)
+	if Bus1.strip() in changeOldToNewDict.keys():
+		Bus1 = changeOldToNewDict[Bus1.strip()]
+		Bus1 = ' '*(6-len(Bus1)) + Bus1
+
+	if Bus2.strip() in changeOldToNewDict.keys():
+		Bus2 = changeOldToNewDict[Bus2.strip()]
+		Bus2 = ' '*(6-len(Bus2)) + Bus2
+
+	if Bus3.strip() in changeOldToNewDict.keys():
+		Bus3 = changeOldToNewDict[Bus3.strip()]
+		Bus3 = ' '*(6-len(Bus3)) + Bus3
+
+	line = Bus1 + ' ' + Bus2 + ' ' + Bus3 + RestOfLine
+ 
 	newTFLines.append(line)
-"""
+
+
+
+
+
 # print new seq file
 with open(newSeqFile,'w') as f:
 	f.write("0          / Tue Feb 28 19:13:11 2017")
@@ -201,7 +232,7 @@ with open(newSeqFile,'w') as f:
 	writeLines(newMutualZLines)
 	f.write("0/ End of Zero Sequence Mutual Impedance Data; Begin Zero Sequence Transformer Data")
 	f.write('\n')
-	"""
+
 	writeLines(newTFLines)
 	f.write("0/ End of Zero-Sequence Transformer data; Begin Area Data")
 	f.write('\n')
@@ -209,4 +240,4 @@ with open(newSeqFile,'w') as f:
 	f.write("0/ End of Zero Sequence Switched Shunt Data")
 	f.write('\n')
 	f.write("0/ End of Zero Sequence Fixed Shunt Data")
-	"""
+

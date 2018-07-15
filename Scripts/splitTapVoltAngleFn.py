@@ -156,6 +156,15 @@ def splitTapVoltAngles(Raw,newRawFile,tapSplitLines):
 		StartAngle = BusAngleDict[start]
 		EndAngle = BusAngleDict[end]
 
+		"""
+		print 'Before phase shift'
+		print 'Start bus:', start
+		print 'End bus:', end
+
+		print 'StartAngle:', StartAngle
+		print 'EndAngle:', EndAngle
+		"""
+
 		# incorporate any phase shifts due to tf
 		if start in AngleChangeDict.keys():
 			StartAngle -= AngleChangeDict[start]
@@ -163,10 +172,24 @@ def splitTapVoltAngles(Raw,newRawFile,tapSplitLines):
 		if end in AngleChangeDict.keys():
 			EndAngle -= AngleChangeDict[end]
 
-		angleDiff = EndAngle -StartAngle
+		"""
+		print 'After phase shift'
+		print 'Start bus:', start
+		print 'End bus:', end
 
-		TapAngleOld = BusAngleDict[start]
+		print 'StartAngle:', StartAngle
+		print 'EndAngle:', EndAngle
+		"""
+
+		angleDiff = EndAngle -StartAngle
+		#print 'Angle Difference: ', angleDiff
+
+		#TapAngleOld = BusAngleDict[start]
+		TapAngleOld = StartAngle
+		#print 'Old Tap Angle: ', TapAngleOld
 		TapAngleNew = TapAngleOld + angleDiff*RatioImpStart
+
+		#print 'New Tap Angle' + str(TapAngleNew)
 
 		NewBusAngleDict[tap_bus] = '%.4f' % TapAngleNew
 
